@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - APPL-AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container register-container">
+        
+        <div id="panel1" class="register-panel">
+            <div class="progress-indicator">
+                <div class="step active">1</div>
+                <div class="step-line"></div>
+                <div class="step">2</div>
+                <div class="step-line"></div>
+                <div class="step">3</div>
+                <div class="step-line"></div>
+                <div class="step">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Start setting up by entering the following information:</p>
+            
+            <form id="registerForm1" class="auth-form">
+                <div class="form-group">
+                    <label for="accountType">Are you an Employer or an Applicant?</label>
+                    <select id="accountType" name="accountType" required>
+                        <option value="applicant" selected>Applicant</option>
+                        <option value="employer">Employer</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regEmail">Email:</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regUsername">Username:</label>
+                    <input type="text" id="regUsername" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" required>
+                </div>
+                
+                <p class="auth-footer">
+                    Already have an account? <a href="login.html" class="highlight-link">Log In Instead!</a>
+                </p>
+                
+                <div class="nav-buttons">
+                    <a href="login.html" class="nav-btn back-btn">&#8592; Back</a>
+                    <button type="submit" class="nav-btn next-btn">Next &#8594;</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="panel2Applicant" class="register-panel hidden">
+            <div class="progress-indicator">
+                <div class="step completed">1</div>
+                <div class="step-line completed"></div>
+                <div class="step active">2</div>
+                <div class="step-line"></div>
+                <div class="step">3</div>
+                <div class="step-line"></div>
+                <div class="step">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Please fill in personal information:</p>
+            
+            <form id="applicantForm1" class="auth-form">
+                <div class="form-group">
+                    <label for="surname">Surname:</label>
+                    <input type="text" id="surname" name="surname" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="middleName">Middle Name:</label>
+                    <input type="text" id="middleName" name="middleName">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" required>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn back-btn prev-panel">&#8592; Previous</button>
+                    <button type="submit" class="nav-btn next-btn">Next &#8594;</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="panel3Applicant" class="register-panel hidden">
+            <div class="progress-indicator">
+                <div class="step completed">1</div>
+                <div class="step-line completed"></div>
+                <div class="step completed">2</div>
+                <div class="step-line completed"></div>
+                <div class="step active">3</div>
+                <div class="step-line"></div>
+                <div class="step">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Please fill in personal information:</p>
+            
+            <form id="applicantForm2" class="auth-form">
+                <div class="form-group">
+                    <label>Birth Date</label>
+                    <div class="birth-date-group">
+                        <input type="text" id="birthDay" name="birthDay" placeholder="DD" maxlength="2" required>
+                        <input type="text" id="birthMonth" name="birthMonth" placeholder="MM" maxlength="2" required>
+                        <input type="text" id="birthYear" name="birthYear" placeholder="YYYY" maxlength="4" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sex">Sex:</label>
+                    <select id="sex" name="sex" required>
+                        <option value="" disabled selected>Select Gender.</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not">Prefer not to say</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactNumber">Contact Number:</label>
+                    <input type="tel" id="contactNumber" name="contactNumber" required>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn back-btn prev-panel">&#8592; Previous</button>
+                    <button type="submit" class="nav-btn next-btn">Next &#8594;</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="panel2Employer" class="register-panel hidden">
+            <div class="progress-indicator">
+                <div class="step completed">1</div>
+                <div class="step-line completed"></div>
+                <div class="step active">2</div>
+                <div class="step-line"></div>
+                <div class="step">3</div>
+                <div class="step-line"></div>
+                <div class="step">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Please fill in company details:</p>
+            
+            <form id="employerForm1" class="auth-form">
+                <div class="form-group">
+                    <label for="companyName">Company Name:</label>
+                    <input type="text" id="companyName" name="companyName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="companyAddress">Company Address:</label>
+                    <input type="text" id="companyAddress" name="companyAddress" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="companyContact">Company Contact Number:</label>
+                    <input type="tel" id="companyContact" name="companyContact" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="industry">Industry:</label>
+                    <input type="text" id="industry" name="industry" required>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn back-btn prev-panel">&#8592; Previous</button>
+                    <button type="submit" class="nav-btn next-btn">Next &#8594;</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="panel3Employer" class="register-panel hidden">
+            <div class="progress-indicator">
+                <div class="step completed">1</div>
+                <div class="step-line completed"></div>
+                <div class="step completed">2</div>
+                <div class="step-line completed"></div>
+                <div class="step active">3</div>
+                <div class="step-line"></div>
+                <div class="step">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Please fill in employer information:</p>
+            
+            <form id="employerForm2" class="auth-form">
+                <div class="form-group">
+                    <label for="employerFullName">Employer Full Name:</label>
+                    <input type="text" id="employerFullName" name="employerFullName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="employerPosition">Employer Position:</label>
+                    <input type="text" id="employerPosition" name="employerPosition" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="employerEmail">Employer Personal Email:</label>
+                    <input type="email" id="employerEmail" name="employerEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="employerContact">Employer Contact Number:</label>
+                    <input type="tel" id="employerContact" name="employerContact" required>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn back-btn prev-panel">&#8592; Previous</button>
+                    <button type="submit" class="nav-btn next-btn">Next &#8594;</button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="panel4Final" class="register-panel hidden">
+            <div class="progress-indicator">
+                <div class="step completed">1</div>
+                <div class="step-line completed"></div>
+                <div class="step completed">2</div>
+                <div class="step-line completed"></div>
+                <div class="step completed">3</div>
+                <div class="step-line completed"></div>
+                <div class="step active">4</div>
+            </div>
+            
+            <h1 class="auth-title">Welcome to APPL-AI!</h1>
+            <p class="auth-subtitle">Almost there!</p>
+            
+            <form id="finalForm" class="auth-form">
+                <div class="profile-upload">
+                    <div class="avatar-preview">
+                        <div class="avatar-placeholder">
+                            <button type="button" class="upload-btn">Upload File &#8593;</button>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h3>Applicant/Employer Name</h3>
+                        <p>Username</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                
+                <div class="form-group terms-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="terms" required>
+                        <span>By signing up I agree with the <a href="#" class="highlight-link">Terms and Conditions</a></span>
+                    </label>
+                </div>
+                
+                <div class="nav-buttons final-nav">
+                    <button type="button" class="nav-btn back-btn prev-panel">&#8592; Previous</button>
+                    <button type="submit" class="auth-btn create-account-btn">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
