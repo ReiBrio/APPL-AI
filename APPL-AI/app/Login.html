@@ -5,39 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - APPL-AI</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="auth-body">
-    <div class="auth-container">
-        <a href="index.html" class="back-link">&#8592; Back</a>
+<body class="formBg">
+    <div class="formContainer loginContainer">
+        <a href="LandingPage.html" class="formBackLink">&#8592; Back</a>
         
-        <div class="auth-form-wrapper">
-            <h1 class="auth-title">Welcome Back!</h1>
-            <p class="auth-subtitle">Please enter your details to log in.</p>
+        <div class="formWrapper">
+            <h1 class="formTitle">Welcome Back!</h1>
+            <p class="formSubtitle">Please enter your details to log in.</p>
             
-            <form id="loginForm" class="auth-form">
-                <div class="input-group">
+            <form id="loginForm" class="form">
+                <div class="formInput">
                     <input type="text" id="username" name="username" placeholder="Username / Email" required>
-                    <span class="input-icon user-icon"></span>
+                    <span class="formIcon formUserIcon"></span>
                 </div>
                 
-                <div class="input-group">
+                <div class="formInput">
                     <input type="password" id="password" name="password" placeholder="Password" required>
-                    <span class="input-icon lock-icon"></span>
+                    <span class="formIcon formEyeIcon togglePassword"></span>
                 </div>
                 
-                <div class="form-options">
-                    <label class="checkbox-label">
+                <div class="formOptions">
+                    <label class="formCheckBox">
                         <input type="checkbox" name="remember" checked>
                         <span>Remember me</span>
                     </label>
-                    <a href="forgot-password.html" class="forgot-link">Forgot Password</a>
+                    <a href="ForgotPassword.html" class="forgotPasswordLink">Forgot Password</a>
                 </div>
-                
-                <button type="submit" class="auth-btn">Login</button>
+                <button type="login" class="formBtn">Login</button>
             </form>
             
-            <p class="auth-footer">
-                Don't have an account? <a href="register.html" class="highlight-link">Register Now!</a>
+            <p class="formFooter">
+                Don't have an account? <a href="Register.html" class="formFooterLink">Register Now!</a>
             </p>
         </div>
     </div>
