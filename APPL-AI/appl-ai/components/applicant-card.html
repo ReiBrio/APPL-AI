@@ -1,0 +1,17 @@
+<div class="applicantCard">
+    <div class="applicantInfo">
+        <div class="applicantCardAvatar"></div>
+        <h3>{{applicantName}}</h3>
+    </div>
+    <div class="applicantStatus">
+        <span class="statusBadge {{statusClass}}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                {{statusIcon}}
+            </svg>
+            {{statusText}}
+        </span>
+    </div>
+    <div class="applicantCheckBox">
+        <input type="checkbox" class="applicantSelect" data-applicant-id="{{applicantId}}">
+    </div>
+</div>
