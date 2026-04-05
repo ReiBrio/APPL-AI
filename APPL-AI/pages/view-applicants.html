@@ -1,0 +1,47 @@
+<div class="pageContent focus-mode">
+    <div class="viewApplicantsHeader pageHeader">
+        <h2 class="pageTitle">Applicants</h2>
+        <div class="pageFilter">
+            <span class="filterLabel">Filter By:</span>
+
+            <select class="filterSelect">
+                <option>Date Applied</option>
+                <option>Most Recent</option>
+                <option>Oldest</option>
+            </select>
+
+            <select class="filterSelect">
+                <option>Score Range</option>
+                <option>90 - 100</option>
+                <option>80 - 89</option>
+                <option>70 - 79</option>
+                <option>Below 70</option>
+            </select>
+
+            <select class="filterSelect">
+                <option>Status</option>
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Rejected</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="viewApplicantsLayout">
+        <div class="applicantsMain">
+            <div class="applicantsActions">
+                <div class="selectedCountConatiner">
+                    <span class="selectedCount">0 Selected</span>
+                </div>
+
+                <div class="applicantsBtns">
+                    <button type="button" class="selectAllBtn applicantsBtn">Select All</button>
+                    <button type="button" class="approveSelectedBtn applicantsBtn">Approve</button>
+                    <button type="button" class="rejectSelectedBtn applicantsBtn">Reject</button>
+                </div>
+            </div>
+
+            <div class="applicantsList" id="applicantsListContainer"></div>
+        </div>
+    </div>
+</div>

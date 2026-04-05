@@ -1,0 +1,135 @@
+<div class="pageContent focus-mode">
+    <div class="viewApplicationLayout">
+        <div class="applicationMain">
+            <button class="backBtn" id="backToApplicantsBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back
+            </button>
+            <div class="applicationSidebar">
+                <div class="applicantProfile" data-link="profile">
+                    <div class="applicantAvatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h3>Bam Adebayo</h3>
+                    <p>@bamGoarns</p>
+                </div>
+
+                <div class="applicantScore">
+                    <h3>Applicant Score</h4>
+                    <div class="donutChartContainer active" id="donutChartContainer">
+                        <div class="donutChart" id="donutChart" style="--final-degree: 216deg;">
+                            <span class="donutChartCenter" id="mainPercentage">60%</span>
+                        </div>
+                    </div>
+
+                    <div class="scoreContainer">
+                        <div class="chartCard">
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Skills</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill red" style="--targetWidth: 40%;">40%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Experience</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill green" style="--targetWidth: 80%;">80%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Education</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill yellow" style="--targetWidth: 50%;">50%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Achievements</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill green" style="--targetWidth: 89%;">89%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Age</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill green" style="--targetWidth: 80%;">80%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Resume Quality</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill red" style="--targetWidth: 30%;">30%</div>
+                                </div>
+                            </div>
+                            <div class="scoreBar">
+                                <span class="scoreLabel">Total Score</span>
+                                <div class="scoreProgress">
+                                    <div class="scoreFill green" style="--targetWidth: 80%;">60%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="formOptions">
+                        <button class="approveBtn formBtn">Accept</button>
+                        <button class="rejectBtn formBtn">Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="resumeDetails">
+            <div class="detailSection">
+                <h3>Resume Overview</h3>
+                <div class="resumeContent">
+                    <h4>1. Skills:</h4>
+                    <ul>
+                        <li>Programming</li>
+                        <li>Database Management</li>
+                        <li>Frontend Development</li>
+                    </ul>
+
+                    <h4>2. Experience:</h4>
+                    <ul>
+                        <li>2 Years Internship</li>
+                    </ul>
+
+                    <h4>3. Education:</h4>
+                    <ul>
+                        <li>UNP BSCS Degree Holder</li>
+                    </ul>
+
+                    <h4>4. Achievements:</h4>
+                    <ul>
+                        <li>N/A</li>
+                    </ul>
+
+                    <h4>5. Age:</h4>
+                    <ul>
+                        <li>23 Years Old</li>
+                    </ul>
+
+                    <h4>6. Resume Quality:</h4>
+                    <p>The resume is readable and structured but can be optimized.</p>
+
+                    <p class="overallAssessment">
+                        <strong>Overall:</strong> The candidate demonstrates strong technical potential. Improving quantified achievements and including more industry keywords could increase the resume score above 90/100.
+                    </p>
+                </div>
+                <div class="resumeFooter">
+                    <button class="downloadResumeButton formBtn">
+                    <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13V4M7 14H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2m-1-5-4 5-4-5m9 8h.01"/>
+                    </svg>
+                    Download Resume
+                </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

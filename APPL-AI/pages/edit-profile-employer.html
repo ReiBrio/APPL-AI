@@ -1,0 +1,99 @@
+<div class="pageContent focus-mode">
+    <div class="formContainer">
+        <button class="backBtn" id="backToProfileBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Back
+        </button>
+
+        <div class="editProfileAvatar">
+            <div class="profileAvatar company-avatar-large"></div>
+            <button class="changePicBtn formBtn" id="browseBtn">Change Photo</button>
+            <input type="file" id="fileInput" hidden accept=".pdf,.doc,.docx">
+        </div>
+
+        <form class="form" id="editProfileForm">
+            <div class="formSection">
+                <h3>Account Details</h3>
+                <div class="formInput">
+                    <label >Description:</label>
+                    <textarea id="description" name="description" rows="4" placeholder="Tell us about yourself..."></textarea>
+                </div>
+                
+                <div class="formInput">
+                    <label>Username</label>
+                    <input type="text" value="BrandOfficial" placeholder="Enter username">
+                </div>
+
+                <div class="formInput">
+                    <label>Email</label>
+                    <input type="email" value="pldt@gmail.com" placeholder="Enter email">
+                </div>
+
+                <div class="formInput">
+                    <label>Password</label>
+                    <input type="password" placeholder="Enter new password">
+                </div>
+            </div>
+
+            <div class="formSection">
+                <h3>Company Details</h3>
+                
+                <div class="formInput">
+                    <label>Company Name</label>
+                    <input type="text" value="PLDT, Inc." placeholder="Enter company name">
+                </div>
+
+                <div class="formInput">
+                    <label>Company Address</label>
+                    <input type="text" value="Vigan City, Ilocos Sur, Philippines" placeholder="Enter company address">
+                </div>
+
+                <div class="formInput">
+                    <label>Company Contact Number</label>
+                    <input type="tel" value="09876543101" placeholder="Enter company contact number">
+                </div>
+
+                <div class="formInput">
+                    <label>Industry</label>
+                    <input type="text" value="Telecommunications" placeholder="Enter industry">
+                </div>
+            </div>
+
+            <div class="formSection">
+                <h3>Employer Details</h3>
+                
+                <div class="formInput">
+                    <label>Employer Full Name</label>
+                    <input type="text" value="Juan Dela Cruz" placeholder="Enter full name">
+                </div>
+
+                <div class="formInput">
+                    <label>Employer Position</label>
+                    <input type="text" value="Human Resource Manager" placeholder="Enter position">
+                </div>
+
+                <div class="formInput">
+                    <label>Employer Email</label>
+                    <input type="email" value="juandelacruz@gmail.com" placeholder="Enter email">
+                </div>
+
+                <div class="formInput">
+                    <label>Employer Contact Number</label>
+                    <input type="tel" value="09876543211" placeholder="Enter contact number">
+                </div>
+            </div>
+
+            <div class="formOptions">
+                <button type="button" class="cancelBtn formBtn" id="cancelEditBtn">Cancel</button>
+                <button type="submit" class="saveBtn formBtn">Save Changes</button>
+            </div>
+
+            <div class="formFooter">
+                <button type="button" class="deleteAccountBtn">Delete Account</button>
+            </div>
+        </form>
+    </div>
+</div>
