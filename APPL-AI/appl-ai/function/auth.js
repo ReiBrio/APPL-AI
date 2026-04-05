@@ -38,7 +38,6 @@ document.querySelectorAll('.company-card, .testimonial-card').forEach(card => {
 // ============================================
 // AUTHENTICATION SYSTEM
 // ============================================
-// Store selected role for registration
 let selectedRole = 'applicant';
 let currentPanel = 1;
 
@@ -50,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.togglePassword').forEach(toggle => {
         toggle.addEventListener('click', function () {
             const formInput = this.closest('.formInput');
-            const passwordField = formInput ? formInput.querySelector('input') : null;
+            const passwordField = formInput ? formInput.querySelector('input[type="password"], input[type="text"]') : null;
 
             if (!passwordField) return;
 
@@ -100,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            if (!validateEmail(email)) {
+            if (typeof validateEmail === 'function' && !validateEmail(email)) {
                 alert('Please enter a valid email address');
                 return;
             }
@@ -154,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            if (!validateEmail(email)) {
+            if (typeof validateEmail === 'function' && !validateEmail(email)) {
                 alert('Please enter a valid email address');
                 return;
             }
@@ -176,12 +175,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
 
+            if (!accountType) {
+                alert('Please select an account type');
+                return;
+            }
+
             if (!email || !username || !password) {
                 alert('Please fill in all fields');
                 return;
             }
 
-            if (!validateEmail(email)) {
+            if (typeof validateEmail === 'function' && !validateEmail(email)) {
                 alert('Please enter a valid email address');
                 return;
             }
@@ -193,6 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             selectedRole = accountType;
             currentPanel = 2;
+
             document.getElementById('panel1').classList.add('formHidden');
 
             if (selectedRole === 'applicant') {
@@ -210,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (applicantForm1) {
         applicantForm1.addEventListener('submit', function(e) {
             e.preventDefault();
+
             const surname = document.getElementById('surname').value.trim();
             const firstName = document.getElementById('firstName').value.trim();
             const address = document.getElementById('address').value.trim();
@@ -230,17 +236,13 @@ document.addEventListener('DOMContentLoaded', function() {
         applicantForm2.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const birthDay = document.getElementById('birthDate').value.trim();
+            const educationAttained = document.getElementById('educationAttained').value;
+            const birthDate = document.getElementById('birthDate').value;
             const sex = document.getElementById('sex').value;
             const contactNumber = document.getElementById('contactNumber').value.trim();
 
-            if (!birthDay || !birthMonth || !birthYear || !sex || !contactNumber) {
+            if (!educationAttained || !birthDate || !sex || !contactNumber) {
                 alert('Please fill in all fields');
-                return;
-            }
-
-            if (!validateDate(birthDay, birthMonth, birthYear)) {
-                alert('Please enter a valid date');
                 return;
             }
 
@@ -289,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            if (!validateEmail(employerEmail)) {
+            if (typeof validateEmail === 'function' && !validateEmail(employerEmail)) {
                 alert('Please enter a valid email address');
                 return;
             }
@@ -323,7 +325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ------------------------
     // PREVIOUS BUTTONS
     // ------------------------
-    document.querySelectorAll('.prev-panel').forEach(btn => {
+    document.querySelectorAll('.backBtn').forEach(btn => {
         btn.addEventListener('click', function() {
             if (currentPanel === 2) {
                 document.getElementById('panel2Applicant').classList.add('formHidden');
@@ -354,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ------------------------
     // FILE UPLOAD
     // ------------------------
-    const uploadBtn = document.querySelector('.upload-btn');
+    const uploadBtn = document.querySelector('.regUploadProfileBtn');
     if (uploadBtn) {
         uploadBtn.addEventListener('click', function() {
             alert('File upload functionality coming soon!');
