@@ -47,17 +47,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // ------------------------
     // UNIVERSAL PASSWORD SHOW/HIDE
     // ------------------------
-    document.querySelectorAll(".togglePassword").forEach(icon => {
-        icon.addEventListener("click", function () {
-            const passwordField = this.parentElement.querySelector("input");
+    document.querySelectorAll('.togglePassword').forEach(toggle => {
+        toggle.addEventListener('click', function () {
+            const formInput = this.closest('.formInput');
+            const passwordField = formInput ? formInput.querySelector('input') : null;
+
             if (!passwordField) return;
 
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                this.classList.add("show");
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                this.classList.add('show');
             } else {
-                passwordField.type = "password";
-                this.classList.remove("show");
+                passwordField.type = 'password';
+                this.classList.remove('show');
             }
         });
     });

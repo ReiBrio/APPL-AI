@@ -27,6 +27,7 @@ const ComponentData = {
             companyName: 'Jollibee Foods Corp.',
             companyIndustry: '@jollibee',
             companyLogo: 'assets/featured-companies/jollibee.png',
+            profileLink: 'profile',
             description: 'Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.Jollibee Inc. is hiring a Customer Service Representative to join our team.',
             image: 'assets/featured-companies/jollibee.png',
             date: 'January 31, 2026 - March 31, 2026',
@@ -40,6 +41,7 @@ const ComponentData = {
             companyName: 'Jollibee Foods Corp.',
             companyIndustry: '@jollibee',
             companyLogo: 'assets/featured-companies/jollibee.png',
+            profileLink: 'profile',
             description: 'Jollibee Inc. is hiring a Customer Service Representative to join our team.',
             image: 'assets/featured-companies/jollibee.png',
             date: 'January 31, 2026 - March 31, 2026',
@@ -53,6 +55,7 @@ const ComponentData = {
             companyName: 'Jollibee Foods Corp.',
             companyIndustry: '@jollibee',
             companyLogo: 'assets/featured-companies/jollibee.png',
+            profileLink: 'profile',
             description: 'Jollibee Inc. is hiring a Customer Service Representative to join our team.',
             image: 'assets/featured-companies/jollibee.png',
             date: 'January 31, 2026 - March 31, 2026',
@@ -66,6 +69,7 @@ const ComponentData = {
             companyName: 'PLDT Inc.',
             companyIndustry: 'Telecommunications',
             companyLogo: 'assets/featured-companies/jollibee.png',
+            profileLink: 'profile',
             description: 'PLDT Inc. is hiring a Customer Service Representative to join our team.',
             image: 'assets/featured-companies/jollibee.png',
             date: 'January 31, 2026 - March 31, 2026',
@@ -229,13 +233,25 @@ function setupEventListeners() {
         const companyCard = e.target.closest('.featuredCompany');
         if (companyCard && companyCard.dataset.link) {
             loadPage(companyCard.dataset.link);
+            return;
         }
-    });
 
-    document.addEventListener('click', function(e) {
-        const notificationItem = e.target.closest('.notification-item');
+        const notificationItem = e.target.closest('.notification');
         if (notificationItem && notificationItem.dataset.link) {
             loadPage(notificationItem.dataset.link);
+            return;
+        }
+
+        const jobProfile = e.target.closest('.jobCompany');
+        if (jobProfile && jobProfile.dataset.link) {
+            loadPage(jobProfile.dataset.link);
+            return;
+        }
+
+        const applicantProfile = e.target.closest('.applicantProfile');
+        if (applicantProfile && applicantProfile.dataset.link) {
+            loadPage(applicantProfile.dataset.link);
+            return;
         }
     });
 
@@ -371,6 +387,7 @@ async function loadJobCards(containerId, jobsData) {
             companyName: job.companyName,
             industry: job.companyIndustry,
             companyLogo: job.companyLogo,
+            profileLink: job.profileLink,
             description: job.description,
             jobImage: job.image,
             dateRange: job.date,
@@ -1123,6 +1140,7 @@ function initializeViewApplicationPage() {
         });
     }
 }
+
 
 // ============================================
 // AUTHENTICATION & UTILITY FUNCTIONS
