@@ -16,17 +16,20 @@
         <form class="form" id="createPostForm">
             <div class="formSection">
                 <h3>Job Information</h3>
-                
+
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Job Title" required>
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" id="jobTitle" placeholder="Enter Job Title" required>
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Department / Team" required>
+                    <label for="department">Department / Team</label>
+                    <input type="text" id="department" placeholder="Enter Department / Team" required>
                 </div>
 
                 <div class="formInput">
-                    <select required>
+                    <label for="deploymentType">Deployment Type</label>
+                    <select id="deploymentType" required>
                         <option value="">Select Deployment Type</option>
                         <option>Full-time</option>
                         <option>Part-time</option>
@@ -36,7 +39,8 @@
                 </div>
 
                 <div class="formInput">
-                    <select required>
+                    <label for="workSetup">Work Setup</label>
+                    <select id="workSetup" required>
                         <option value="">Select Work Setup</option>
                         <option>On-site</option>
                         <option>Remote</option>
@@ -45,25 +49,36 @@
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Deployment Location" required>
+                    <label for="deploymentLocation">Deployment Location</label>
+                    <input type="text" id="deploymentLocation" placeholder="Enter Deployment Location" required>
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Working Hours per week" required>
+                    <label for="workingHours">Working Hours Per Week</label>
+                    <input type="text" id="workingHours" placeholder="Enter Working Hours per week" required>
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Salary Range" required>
+                    <label for="salaryRange">Salary Range</label>
+                    <select id="salaryRange">
+                        <option value="">Select Salary Range</option>
+                        <option>Below 20k</option>
+                        <option>20k - 50k</option>
+                        <option>50k - 100k</option>
+                        <option>Above 100k</option>
+                    </select>
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Slots Available" required>
+                    <label for="slotsAvailable">Slots Available</label>
+                    <input type="text" id="slotsAvailable" placeholder="Enter Slots Available" required>
                 </div>
 
                 <p class="formNote">For the following, leave blank if not needed.</p>
 
                 <div class="formInput">
-                    <select>
+                    <label for="idealAge">Ideal Age Range</label>
+                    <select id="idealAge">
                         <option value="">Select Ideal Age Range</option>
                         <option>18-25</option>
                         <option>26-35</option>
@@ -73,8 +88,9 @@
                 </div>
 
                 <div class="formInput">
+                    <label for="educationAttained">Ideal Education Attained</label>
                     <select id="educationAttained" name="educationAttained">
-                        <option value="" disabled selected>Select Ideal Education Attained</option>
+                        <option value="">Select Ideal Education Attained</option>
                         <option>No Formal Education</option>
                         <option>Elementary Graduate</option>
                         <option>Junior High School Graduate</option>
@@ -89,19 +105,22 @@
                 </div>
 
                 <div class="formInput">
-                    <input type="text" placeholder="Enter Ideal Years of Experience">
+                    <label for="idealYearsOfExperience">Ideal Years of Experience</label>
+                    <input type="text" id="idealYearsOfExperience" placeholder="Enter Ideal Years of Experience">
                 </div>
 
                 <div class="formInput">
-                    <textarea rows="4" placeholder="Enumerate Ideal Skills"></textarea>
+                    <label for="idealSkills">Ideal Skills</label>
+                    <textarea id="idealSkills" rows="4" placeholder="Enumerate Ideal Skills"></textarea>
                 </div>
             </div>
 
             <div class="formSection">
                 <h3>Post Information</h3>
-                
+
                 <div class="formInput">
-                    <textarea rows="4" placeholder="Enter Post Description" required></textarea>
+                    <label for="postDescription">Post Description</label>
+                    <textarea id="postDescription" rows="4" placeholder="Enter Post Description" required></textarea>
                 </div>
 
                 <div class="formCheckBox">
@@ -112,15 +131,15 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Post Deadline</label>
-                    <input type="date">
+                    <label for="postDeadline">Post Deadline</label>
+                    <input type="date" id="postDeadline">
                 </div>
 
                 <div class="fileUploadSection formInput">
-                    <label>Attach Job Image:</label>
+                    <label for="fileInput">Attach Job Image</label>
                     <div class="fileDropZone" id="fileDropZone">
-                        <p>Drag and Drop files or <button class="browseBtn" id="browseBtn">Browse</button></p>
-                        <input type="file" id="fileInput" hidden accept=".pdf,.doc,.docx">
+                        <p>Drag and Drop files or <button type="button" class="browseBtn" id="browseBtn">Browse</button></p>
+                        <input type="file" id="fileInput" hidden accept="image/*">
                     </div>
                 </div>
             </div>
@@ -128,7 +147,7 @@
             <div class="formSection">
                 <h3>Job Qualifications</h3>
                 <p class="formNote">Please select ideal priority applicant traits.</p>
-                
+
                 <div class="qualifications-grid">
                     <div class="formCheckBox">
                         <input type="checkbox" id="skills">
@@ -157,7 +176,8 @@
                 </div>
 
                 <div class="formInput">
-                    <select>
+                    <label for="targetScore">Target Score Range</label>
+                    <select id="targetScore">
                         <option value="">Select Target Score Range</option>
                         <option>90-100</option>
                         <option>80-89</option>

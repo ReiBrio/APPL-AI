@@ -1,3 +1,5 @@
+// auth.js
+
 // Smooth scroll for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
@@ -76,6 +78,8 @@ const DB_CONFIG = {
     employerContactColumn: 'EmployerContact'
 };
 
+const SESSION_KEY = 'applaiSession';
+
 document.addEventListener('DOMContentLoaded', function() {
     initializePasswordToggles();
     initializeLoginForm();
@@ -91,6 +95,22 @@ function getSupabaseClient() {
         throw new Error('Supabase client not found');
     }
     return window.supabaseClient;
+}
+
+function saveUserSession(userId, userType, rememberMe = false) {
+    const payload = {
+        UserID: userId,
+        UserType: userType
+    };
+
+    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
+
+    if (rememberMe) {
+        localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    } else {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+    }
 }
 
 function initializePasswordToggles() {
@@ -139,10 +159,6 @@ function initializeLoginForm() {
                 .from(DB_CONFIG.userTable)
                 .select(`
                     ${DB_CONFIG.userIdColumn},
-                    ${DB_CONFIG.emailColumn},
-                    ${DB_CONFIG.usernameColumn},
-                    ${DB_CONFIG.imageColumn},
-                    ${DB_CONFIG.descriptionColumn},
                     ${DB_CONFIG.userTypeColumn},
                     ${DB_CONFIG.passwordColumn}
                 `)
@@ -167,20 +183,11 @@ function initializeLoginForm() {
 
             const rememberMe = !!document.querySelector('input[name="remember"]')?.checked;
 
-            const userSession = {
-                userId: user[DB_CONFIG.userIdColumn],
-                email: user[DB_CONFIG.emailColumn],
-                username: user[DB_CONFIG.usernameColumn],
-                userType: user[DB_CONFIG.userTypeColumn],
-                userImage: user[DB_CONFIG.imageColumn] || '',
-                userDescription: user[DB_CONFIG.descriptionColumn] || ''
-            };
-
-            if (rememberMe) {
-                localStorage.setItem('applaiCurrentUser', JSON.stringify(userSession));
-            } else {
-                sessionStorage.setItem('applaiCurrentUser', JSON.stringify(userSession));
-            }
+            saveUserSession(
+                user[DB_CONFIG.userIdColumn],
+                user[DB_CONFIG.userTypeColumn],
+                rememberMe
+            );
 
             alert('Login successful!');
             window.location.href = 'main.html';
@@ -627,7 +634,7 @@ async function createUserAccount() {
         }
     }
 
-    return { success: true, userId: newUserId };
+    return { success: true, userId: newUserId, userType: accountType };
 }
 
 function escapeSupabaseValue(value) {

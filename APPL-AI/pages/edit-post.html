@@ -15,20 +15,20 @@
         <form class="form" id="editPostForm">
             <div class="formSection">
                 <h3>Job Information</h3>
-                
+
                 <div class="formInput">
-                    <label>Job Title</label>
-                    <input type="text" required>
+                    <label for="jobTitle">Job Title</label>
+                    <input type="text" id="jobTitle" required>
                 </div>
 
                 <div class="formInput">
-                    <label>Department/Team</label>
-                    <input type="text" required>
+                    <label for="department">Department / Team</label>
+                    <input type="text" id="department" required>
                 </div>
 
                 <div class="formInput">
-                    <label>Deployment Type</label>
-                    <select required>
+                    <label for="deploymentType">Deployment Type</label>
+                    <select id="deploymentType" required>
                         <option value="">Select Deployment Type</option>
                         <option>Full-time</option>
                         <option>Part-time</option>
@@ -38,8 +38,8 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Work Setup</label>
-                    <select required>
+                    <label for="workSetup">Work Setup</label>
+                    <select id="workSetup" required>
                         <option value="">Select Work Setup</option>
                         <option>On-site</option>
                         <option>Remote</option>
@@ -48,31 +48,34 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Deployment Location</label>
-                    <input type="text" placeholder="Enter Deployment Location" required>
+                    <label for="deploymentLocation">Deployment Location</label>
+                    <input type="text" id="deploymentLocation" required>
                 </div>
 
                 <div class="formInput">
-                    <label>Working Hours Per Week</label>
-                    <input type="text" placeholder="Enter Working Hours per week" required>
+                    <label for="workingHours">Working Hours Per Week</label>
+                    <input type="text" id="workingHours" required>
                 </div>
 
                 <div class="formInput">
-                    <label>Salary Range</label>
-                    <input type="text" placeholder="Enter Salary Range" required>
+                    <label for="salaryRange">Salary Range</label>
+                    <select id="salaryRange">
+                        <option value="">Select Salary Range</option>
+                        <option>Below 20k</option>
+                        <option>20k - 50k</option>
+                        <option>50k - 100k</option>
+                        <option>Above 100k</option>
+                    </select>
                 </div>
 
                 <div class="formInput">
-                    <label>Slots Available</label>
-                    <input type="text" placeholder="Enter Slots Available" required>
+                    <label for="slotsAvailable">Slots Available</label>
+                    <input type="text" id="slotsAvailable" required>
                 </div>
 
-                <p class="formNote">For the following, leave blank if not needed.</p>
-
                 <div class="formInput">
-                    <label>Ideal Age Range</label>
-                    <select>
-                        <label>Ideal Age Range</label>
+                    <label for="idealAge">Ideal Age Range</label>
+                    <select id="idealAge">
                         <option value="">Select Ideal Age Range</option>
                         <option>18-25</option>
                         <option>26-35</option>
@@ -82,9 +85,9 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Ideal Educational Attainment</label>
-                    <select id="educationAttained" name="educationAttained" required>
-                        <option value="" disabled selected>Select Education Attained</option>
+                    <label for="educationAttained">Ideal Educational Attainment</label>
+                    <select id="educationAttained">
+                        <option value="">Select Education Attained</option>
                         <option>No Formal Education</option>
                         <option>Elementary Graduate</option>
                         <option>Junior High School Graduate</option>
@@ -99,22 +102,22 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Ideal Years of Experience</label>
-                    <input type="text" placeholder="Enter Ideal Years of Experience">
+                    <label for="idealYearsOfExperience">Ideal Years of Experience</label>
+                    <input type="text" id="idealYearsOfExperience">
                 </div>
 
                 <div class="formInput">
-                    <label>Ideal Skills</label>
-                    <textarea rows="4" placeholder="Enumerate Ideal Skills"></textarea>
+                    <label for="idealSkills">Ideal Skills</label>
+                    <textarea id="idealSkills" rows="4"></textarea>
                 </div>
             </div>
 
             <div class="formSection">
                 <h3>Post Information</h3>
-                
+
                 <div class="formInput">
-                    <label>Post Description</label>
-                    <textarea rows="4" placeholder="Enter Post Description" required></textarea>
+                    <label for="postDescription">Post Description</label>
+                    <textarea id="postDescription" rows="4" required></textarea>
                 </div>
 
                 <div class="formCheckBox">
@@ -125,16 +128,60 @@
                 </div>
 
                 <div class="formInput">
-                    <label>Post Deadline</label>
-                    <input type="date">
+                    <label for="postDeadline">Post Deadline</label>
+                    <input type="date" id="postDeadline">
                 </div>
 
-            <div class="fileUploadSection formInput">
-                <label>Job Image/Poster</label>
-                <div class="fileDropZone">
-                    <img src="https://grazia-prod.oss-ap-southeast-1.aliyuncs.com/resources/uid_100015866/8877.png" alt="Current poster" style="max-width: 200px;">
-                    <p>or</p>
-                    <p>Drag and Drop files or <button class="browseBtn" id="browseBtn">Browse</button></p>
+                <div class="fileUploadSection formInput">
+                    <label for="fileInput">Job Image / Poster</label>
+                    <div class="fileDropZone" id="fileDropZone">
+                        <p>Drag and Drop files or <button type="button" class="browseBtn" id="browseBtn">Browse</button></p>
+                    </div>
+                    <input type="file" id="fileInput" hidden accept="image/*">
+                </div>
+            </div>
+
+            <div class="formSection">
+                <h3>Job Qualifications</h3>
+                <p class="formNote">Please select ideal priority applicant traits.</p>
+
+                <div class="qualifications-grid">
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="skills">
+                        <label for="skills">Skills</label>
+                    </div>
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="achievements">
+                        <label for="achievements">Achievements</label>
+                    </div>
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="experience">
+                        <label for="experience">Experience</label>
+                    </div>
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="resumeQuality">
+                        <label for="resumeQuality">Resume Quality</label>
+                    </div>
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="education">
+                        <label for="education">Education</label>
+                    </div>
+                    <div class="formCheckBox">
+                        <input type="checkbox" id="age">
+                        <label for="age">Age</label>
+                    </div>
+                </div>
+
+                <div class="formInput">
+                    <label for="targetScore">Target Score Range</label>
+                    <select id="targetScore">
+                        <option value="">Select Target Score Range</option>
+                        <option>90-100</option>
+                        <option>80-89</option>
+                        <option>70-79</option>
+                        <option>60-69</option>
+                        <option>Below 60</option>
+                    </select>
                 </div>
             </div>
 
