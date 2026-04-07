@@ -1,31 +1,36 @@
 <div class="pageContent">
     <div class="pageHeader">
         <h2 class="pageTitle">Search Results</h2>
+
         <div class="pageFilter">
             <span class="filterLabel">Filter By:</span>
-            <select class="filterSelect">
-                <option>Date Posted</option>
-                <option>Most Recent</option>
-                <option>Oldest</option>
+
+            <select class="filterSelect" id="searchSortFilter">
+                <option value="mostRecent">Most Recent</option>
+                <option value="oldest">Oldest</option>
             </select>
-            <select class="filterSelect">
-                <option>Salary Range</option>
-                <option>Below 20k</option>
-                <option>20k - 50k</option>
-                <option>50k - 100k</option>
-                <option>Above 100k</option>
+
+            <select class="filterSelect" id="searchDeploymentFilter">
+                <option value="all">Deployment Type</option>
+                <option value="full-time">Full-time</option>
+                <option value="part-time">Part-time</option>
+                <option value="contract">Contract</option>
+                <option value="internship">Internship</option>
             </select>
-            <select class="filterSelect">
-                <option>Job Type</option>
-                <option>Full Time</option>
-                <option>Part Time</option>
-                <option>Contract</option>
-            </select> 
-            <select class="filterSelect">
-                <option>Work Status</option>
-                <option>Remote</option>
-                <option>On-site</option>
-                <option>Hybrid</option>
+
+            <select class="filterSelect" id="searchWorkSetupFilter">
+                <option value="all">Work Status</option>
+                <option value="remote">Remote</option>
+                <option value="on-site">On-site</option>
+                <option value="hybrid">Hybrid</option>
+            </select>
+
+            <select class="filterSelect" id="searchSalaryFilter">
+                <option value="all">Salary Range</option>
+                <option value="below20k">Below 20k</option>
+                <option value="20k-50k">20k - 50k</option>
+                <option value="50k-100k">50k - 100k</option>
+                <option value="above100k">Above 100k</option>
             </select>
         </div>
     </div>

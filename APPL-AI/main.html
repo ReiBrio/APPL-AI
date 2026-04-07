@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="mainContainer">
@@ -48,7 +48,7 @@
                         <path d="M14.5,20.5s-.5,1-2.5,1-2.5-1-2.5-1"
                             stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
                     </svg>
-                    <span class="notificationBadge" id="notificationBadge">3</span>
+                    <span class="notificationBadge" id="notificationBadge" style="display: none;">0</span>
                 </button>
 
                 <button class="profileBtn" id="profileBtn">
@@ -163,7 +163,7 @@
                 <div class="fileUploadSection formInput">
                     <label>Attach a Resume File:</label>
                     <div class="fileDropZone" id="fileDropZone">
-                        <p>Drag and Drop files or <button class="browseBtn" id="browseBtn">Browse</button></p>
+                        <p>Drag and Drop files or <button type="button" class="browseBtn" id="browseBtn">Browse</button></p>
                         <input type="file" id="fileInput" hidden accept=".pdf,.doc,.docx">
                     </div>
                 </div>

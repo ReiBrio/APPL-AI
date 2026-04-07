@@ -1,17 +1,33 @@
-<div class="applicantCard">
+<div class="applicantCard" data-applicant-id="{{applicantId}}" data-job-applicant-id="{{jobApplicantId}}">
     <div class="applicantInfo">
-        <div class="applicantCardAvatar"></div>
-        <h3>{{applicantName}}</h3>
+        <div class="applicantCardAvatar" style="background-image: url('{{applicantImage}}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>
+
+        <div class="applicantText">
+            <h3>{{applicantName}}</h3>
+        </div>
     </div>
+
     <div class="applicantStatus">
-        <span class="statusBadge {{statusClass}}">
+        <span class="statusBadge {{matchStatusClass}}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                {{statusIcon}}
+                {{matchStatusIcon}}
             </svg>
-            {{statusText}}
+            {{matchStatusText}}
+        </span>
+
+        <span class="statusBadge {{applicationStatusClass}}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                {{applicationStatusIcon}}
+            </svg>
+            {{applicationStatusText}}
         </span>
     </div>
+
     <div class="applicantCheckBox">
-        <input type="checkbox" class="applicantSelect" data-applicant-id="{{applicantId}}">
+        <input
+            type="checkbox"
+            class="applicantSelect"
+            data-applicant-id="{{applicantId}}"
+            data-job-applicant-id="{{jobApplicantId}}">
     </div>
 </div>
