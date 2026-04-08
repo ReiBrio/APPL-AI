@@ -1,0 +1,5 @@
+// config.example.js 
+window.CONFIG = {
+    SUPABASE_URL: "your-supabase-url-here",
+    SUPABASE_ANON_KEY: "your-anon-key-here"
+};
