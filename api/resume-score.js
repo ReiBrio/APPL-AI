@@ -1,4 +1,5 @@
 import Groq from "groq-sdk";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import mammoth from "mammoth";
 
 function safeNumber(value) {
@@ -56,39 +57,6 @@ function cleanAIJson(text) {
     }
 }
 
-async function extractPdfText(buffer) {
-    console.log("[resume-score] PDF branch started");
-
-    const pdfModule = await import("pdf-parse");
-    const PDFParseClass = pdfModule.PDFParse || pdfModule.default?.PDFParse;
-
-    if (!PDFParseClass) {
-        throw new Error("pdf-parse v2 API not found.");
-    }
-
-    let parser;
-
-    try {
-        parser = new PDFParseClass({ data: buffer });
-        const result = await parser.getText();
-        const text = String(result?.text || "").trim();
-
-        if (!text) {
-            throw new Error("PDF parsed but no text was extracted.");
-        }
-
-        return text;
-    } finally {
-        if (parser && typeof parser.destroy === "function") {
-            try {
-                await parser.destroy();
-            } catch (error) {
-                console.warn("[resume-score] parser destroy warning:", error);
-            }
-        }
-    }
-}
-
 async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "") {
     if (!resumeUrl) {
         throw new Error("Missing resume URL.");
@@ -109,6 +77,10 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
 
     console.log("[resume-score] Downloaded resume bytes:", buffer.length);
 
+    if (!buffer || !buffer.length) {
+        throw new Error("Downloaded resume file is empty.");
+    }
+
     const normalizedFileName = String(fileName || "").toLowerCase();
     const normalizedMimeType = String(mimeType || "").toLowerCase();
 
@@ -117,16 +89,26 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
         normalizedFileName.endsWith(".pdf");
 
     const isDocx =
-        normalizedMimeType.includes("wordprocessingml") ||
-        normalizedMimeType.includes("officedocument") ||
+        normalizedMimeType.includes("word") ||
+        normalizedMimeType.includes("document") ||
         normalizedFileName.endsWith(".docx");
 
     if (isPdf) {
-        return await extractPdfText(buffer);
+        console.log("[resume-score] Parsing as PDF...");
+        console.log("[resume-score] Buffer is Buffer:", Buffer.isBuffer(buffer));
+        console.log("[resume-score] Buffer length:", buffer.length);
+
+        const parsed = await pdfParse(buffer);
+
+        if (!parsed || typeof parsed.text !== "string") {
+            throw new Error("PDF parser returned invalid result.");
+        }
+
+        return parsed.text.trim();
     }
 
     if (isDocx) {
-        console.log("[resume-score] Parsing as DOCX");
+        console.log("[resume-score] Parsing as DOCX...");
         const parsed = await mammoth.extractRawText({ buffer });
         return String(parsed.value || "").trim();
     }
@@ -247,8 +229,7 @@ ${finalResumeText}
             stream: false
         });
 
-        const content = completion?.choices?.[0]?.message?.content || "";
-        console.log("[resume-score] Groq raw preview:", String(content).slice(0, 300));
+        const content = completion.choices?.[0]?.message?.content || "";
 
         let parsed;
         try {
