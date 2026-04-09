@@ -71,7 +71,7 @@ const DB_CONFIG = {
     employerCompanyNameColumn: 'CompanyName',
     employerCompanyAddressColumn: 'CompanyAddress',
     employerCompanyContactColumn: 'CompanyContact',
-    employerIndustryColumn: 'CompanyIndustry',
+    employerCompanyIndustryColumn: 'CompanyIndustry',
     employerFullNameColumn: 'EmployerFullName',
     employerPositionColumn: 'EmployerPosition',
     employerEmailColumn: 'EmployerEmail',
@@ -327,9 +327,9 @@ function initializeRegisterFlow() {
             const companyName = document.getElementById('companyName').value.trim();
             const companyAddress = document.getElementById('companyAddress').value.trim();
             const companyContact = document.getElementById('companyContact').value.trim();
-            const industry = document.getElementById('companyIndustry').value.trim();
+            const companyIndustry = document.getElementById('companyIndustry').value.trim();
 
-            if (!companyName || !companyAddress || !companyContact || !industry) {
+            if (!companyName || !companyAddress || !companyContact || !companyIndustry) {
                 alert('Please fill in all fields');
                 return;
             }
@@ -611,7 +611,7 @@ async function createUserAccount() {
             [DB_CONFIG.employerCompanyNameColumn]: document.getElementById('companyName')?.value.trim() || '',
             [DB_CONFIG.employerCompanyAddressColumn]: document.getElementById('companyAddress')?.value.trim() || '',
             [DB_CONFIG.employerCompanyContactColumn]: document.getElementById('companyContact')?.value.trim() || '',
-            [DB_CONFIG.employerIndustryColumn]: document.getElementById('companyIndustry')?.value.trim() || '',
+            [DB_CONFIG.employerCompanyIndustryColumn]: document.getElementById('companyIndustry')?.value.trim() || '',
             [DB_CONFIG.employerFullNameColumn]: document.getElementById('employerFullName')?.value.trim() || '',
             [DB_CONFIG.employerPositionColumn]: document.getElementById('employerPosition')?.value.trim() || '',
             [DB_CONFIG.employerEmailColumn]: document.getElementById('employerEmail')?.value.trim() || '',
