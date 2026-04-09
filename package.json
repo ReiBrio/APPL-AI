@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "engines": {
-    "node": "22.x"
+    "node": "20.x"
   },
   "dependencies": {
     "groq-sdk": "^0.18.0",
     "mammoth": "^1.12.0",
-    "pdf-parse": "^2.4.5"
+    "pdf-parse": "1.1.1"
   }
 }
