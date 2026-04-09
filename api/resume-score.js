@@ -42,6 +42,10 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
         throw new Error("Missing resume URL.");
     }
 
+    console.log("Fetching resume URL:", resumeUrl);
+    console.log("File name:", fileName);
+    console.log("Mime type:", mimeType);
+
     const response = await fetch(resumeUrl);
 
     if (!response.ok) {
@@ -50,6 +54,8 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
 
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+
+    console.log("Downloaded resume bytes:", buffer.length);
 
     const normalizedFileName = String(fileName || "").toLowerCase();
     const normalizedMimeType = String(mimeType || "").toLowerCase();
@@ -68,16 +74,19 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
         normalizedFileName.endsWith(".txt");
 
     if (isPdf) {
+        console.log("Parsing as PDF...");
         const parsed = await pdfParse(buffer);
         return String(parsed.text || "").trim();
     }
 
     if (isDocx) {
+        console.log("Parsing as DOCX...");
         const parsed = await mammoth.extractRawText({ buffer });
         return String(parsed.value || "").trim();
     }
 
     if (isTxt) {
+        console.log("Parsing as TXT...");
         return buffer.toString("utf-8").trim();
     }
 
@@ -86,6 +95,8 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
 
 export default async function handler(req, res) {
     try {
+        console.log("resume-score invoked");
+
         if (req.method !== "POST") {
             return res.status(405).json({
                 ok: false,
@@ -108,6 +119,11 @@ export default async function handler(req, res) {
             mimeType = "",
             jobPost = {}
         } = req.body || {};
+
+        console.log("Incoming payload keys:", Object.keys(req.body || {}));
+        console.log("Job title:", jobPost?.JobTitle || null);
+        console.log("Has resumeText:", Boolean(String(resumeText || "").trim()));
+        console.log("Has resumeUrl:", Boolean(String(resumeUrl || "").trim()));
 
         if (!jobPost || typeof jobPost !== "object") {
             return res.status(400).json({
@@ -192,6 +208,8 @@ ${finalResumeText}
 
         const content = completion.choices?.[0]?.message?.content || "";
 
+        console.log("Groq raw content preview:", String(content).slice(0, 300));
+
         let parsed;
         try {
             parsed = JSON.parse(content);
@@ -223,6 +241,7 @@ ${finalResumeText}
         });
     } catch (error) {
         console.error("resume-score.js crash:", error);
+        console.error("resume-score.js stack:", error?.stack);
 
         return res.status(500).json({
             ok: false,

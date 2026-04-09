@@ -1823,12 +1823,12 @@ function rebindApplyModalFileElements() {
             const droppedFile = e.dataTransfer?.files?.[0];
             if (!droppedFile) return;
 
-            const validExtensions = ['.pdf', '.doc', '.docx'];
+            const validExtensions = ['.pdf', '.docx'];
             const fileName = String(droppedFile.name || '').toLowerCase();
             const isValid = validExtensions.some(ext => fileName.endsWith(ext));
 
             if (!isValid) {
-                alert('Please upload only PDF, DOC, or DOCX files.');
+                alert('Please upload only PDF or DOCX files.');
                 return;
             }
 
@@ -3353,7 +3353,7 @@ async function handleSubmitApplication() {
         return;
     }
 
-    const allowedExtensions = ['pdf', 'doc', 'docx'];
+    const allowedExtensions = ['pdf', 'docx'];
     const fileNameLower = String(selectedFile.name || '').toLowerCase();
     const extension = fileNameLower.split('.').pop() || '';
 
@@ -3364,7 +3364,7 @@ async function handleSubmitApplication() {
 
     const { data: existingApplication, error: existingApplicationError } = await supabase
         .from('ApplicationTbl')
-        .select('JobApplicantID, PostID')
+        .select('JobApplicantID, PostID, ApplicationStatus')
         .eq('PostID', postId)
         .eq('ApplicantID', applicantId)
         .maybeSingle();
@@ -3376,7 +3376,7 @@ async function handleSubmitApplication() {
     }
 
     if (existingApplication) {
-        alert('You already applied for this job.');
+        alert(`You already applied for this job. Current status: ${existingApplication.ApplicationStatus || 'Pending'}.`);
         return;
     }
 
@@ -3398,7 +3398,6 @@ async function handleSubmitApplication() {
     }
 
     const applicantName = await getApplicantFullName(applicantId);
-
     const payload = buildPendingApplicationPayload(postId, applicantId, resumeValue, null);
 
     const { data: insertedApplication, error: insertError } = await supabase
@@ -3409,6 +3408,47 @@ async function handleSubmitApplication() {
 
     if (insertError) {
         console.error('Failed to submit application:', insertError);
+
+        const errorText = String(insertError.message || '').toLowerCase();
+
+        if (
+            errorText.includes('duplicate key') ||
+            errorText.includes('uq_application_post_applicant') ||
+            errorText.includes('unique constraint')
+        ) {
+            alert('You already applied for this job.');
+
+            if (!AppState.appliedJobs.some(item => Number(item.PostID) === Number(postId))) {
+                AppState.appliedJobs.push({
+                    PostID: Number(postId),
+                    Status: 'Pending'
+                });
+            }
+
+            if (AppState.currentPage === 'home') {
+                const jobs = await loadAllJobs();
+                await loadJobCards('jobFeedContainer', jobs);
+                return;
+            }
+
+            if (AppState.currentPage === 'search-results') {
+                await renderSearchResultsPage();
+                return;
+            }
+
+            if (AppState.currentPage === 'saved') {
+                await renderSavedJobsPage();
+                return;
+            }
+
+            if (AppState.currentPage === 'profile') {
+                await loadProfileJobs();
+                return;
+            }
+
+            return;
+        }
+
         alert(`Failed to submit application: ${insertError.message}`);
         return;
     }
@@ -3450,6 +3490,7 @@ async function handleSubmitApplication() {
 
         const apiUrl = `${getApiBaseUrl()}/api/resume-score`;
         console.log('Calling API URL:', apiUrl);
+        console.log('AI job post payload:', aiJobPost);
 
         let scanResponse;
         try {
@@ -3471,10 +3512,17 @@ async function handleSubmitApplication() {
             throw new Error(`Failed to reach resume scan API: ${networkError.message}`);
         }
 
-        console.log('API status:', scanResponse.status);
-
         const rawResponse = await scanResponse.text();
+        console.log('API status:', scanResponse.status);
         console.log('Raw API response:', rawResponse);
+
+        if (!scanResponse.ok) {
+            throw new Error(
+                rawResponse && rawResponse.trim()
+                    ? `Resume scan API failed: ${rawResponse.slice(0, 500)}`
+                    : `Resume scan API failed with status ${scanResponse.status}`
+            );
+        }
 
         let scanData = null;
 
@@ -3484,7 +3532,7 @@ async function handleSubmitApplication() {
             throw new Error(`API returned non-JSON response: ${rawResponse.slice(0, 300)}`);
         }
 
-        if (!scanResponse.ok || !scanData.ok) {
+        if (!scanData.ok) {
             throw new Error(scanData.error || 'Failed to scan resume.');
         }
 
@@ -3511,6 +3559,7 @@ async function handleSubmitApplication() {
         console.log('AI scan completed successfully.');
     } catch (scanError) {
         console.error('Resume scan error:', scanError);
+
         await markApplicationScanFailed(
             insertedApplication.JobApplicantID,
             scanError.message || 'Unknown scan error'
