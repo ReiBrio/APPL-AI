@@ -448,6 +448,30 @@ function setupEventListeners() {
             await handleSubmitApplication();
         });
     }
+
+    document.addEventListener('click', function (e) {
+        const settingsLink = e.target.closest('.navLink.settings');
+        const helpLink = e.target.closest('.navLink.help');
+        const rulesLink = e.target.closest('.navLink.rules');
+
+        if (settingsLink) {
+            e.preventDefault();
+            loadPage('settings');
+            return;
+        }
+
+        if (helpLink) {
+            e.preventDefault();
+            loadPage('help');
+            return;
+        }
+
+        if (rulesLink) {
+            e.preventDefault();
+            loadPage('rules');
+            return;
+        }
+    });
 }
 
 // ============================================
