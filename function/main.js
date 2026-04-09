@@ -1257,6 +1257,28 @@ async function loadProfileJobs() {
 // ============================================
 // ANCHOR HELPERS
 // ============================================
+function getApiBaseUrl() {
+    const configuredBase =
+        window.APP_CONFIG?.apiBaseUrl ||
+        window.VERCEL_API_BASE_URL ||
+        '';
+
+    if (configuredBase) {
+        return configuredBase.replace(/\/$/, '');
+    }
+
+    const hostname = window.location.hostname;
+    const isLocal =
+        hostname === 'localhost' ||
+        hostname === '127.0.0.1';
+
+    if (isLocal) {
+        return 'http://localhost:3000';
+    }
+
+    return '';
+}
+
 function buildNotificationMessage(notificationType, meta = {}) {
     const senderName = meta.senderName || 'Someone';
     const jobTitle = meta.jobTitle || 'your job post';
@@ -1667,7 +1689,7 @@ async function getApplicationCountsMap(postIds = []) {
     return countsMap;
 }
 
-function buildPendingApplicationPayload(postId, applicantId, resumeValue) {
+function buildPendingApplicationPayload(postId, applicantId, resumeValue, resumeText = null) {
     return {
         PostID: Number(postId),
         ApplicantID: Number(applicantId),
@@ -1683,7 +1705,14 @@ function buildPendingApplicationPayload(postId, applicantId, resumeValue) {
         ApplicationStatus: 'Pending',
         ResumeOverview: null,
         OverallAssessment: null,
+
         Resume: resumeValue || null,
+        ResumeText: resumeText || null,
+
+        ScanStatus: 'Pending',
+        ScannedAt: null,
+        ScanError: null,
+
         DateApplied: new Date().toISOString()
     };
 }
@@ -2475,6 +2504,13 @@ function sanitizeFileName(fileName) {
         .replace(/[^a-zA-Z0-9._-]/g, '');
 }
 
+function sanitizeFileName(fileName) {
+    return String(fileName || 'resume')
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-zA-Z0-9._-]/g, '');
+}
+
 async function uploadResumeToStorage(file, applicantId, postId) {
     const supabase = window.supabaseClient;
 
@@ -3251,6 +3287,49 @@ function handleFileSelect(e) {
     updateResumeFilePreview(file);
 }
 
+async function getApplicantFullName(applicantId) {
+    const supabase = window.supabaseClient;
+    if (!supabase || !applicantId) return 'Applicant';
+
+    const { data, error } = await supabase
+        .from('ApplicantTbl')
+        .select('FirstName, MiddleName, LastName')
+        .eq('ApplicantID', Number(applicantId))
+        .single();
+
+    if (error || !data) {
+        console.error('Failed to load applicant full name:', error);
+        return 'Applicant';
+    }
+
+    return [
+        data.FirstName || '',
+        data.MiddleName || '',
+        data.LastName || ''
+    ]
+        .map(value => String(value).trim())
+        .filter(Boolean)
+        .join(' ') || 'Applicant';
+}
+
+async function getJobPostAIPayloadById(postId) {
+    const supabase = window.supabaseClient;
+    if (!supabase || !postId) return null;
+
+    const { data, error } = await supabase
+        .from('JobPostTbl')
+        .select('*')
+        .eq('PostID', Number(postId))
+        .single();
+
+    if (error || !data) {
+        console.error('Failed to load job post for AI payload:', error);
+        return null;
+    }
+
+    return buildJobPostAIPayload(data);
+}
+
 async function handleSubmitApplication() {
     if (!isApplicant()) {
         alert('Only applicants can submit applications.');
@@ -3269,10 +3348,18 @@ async function handleSubmitApplication() {
     const fileInput = document.getElementById('fileInput');
     const selectedFile = fileInput?.files?.[0] || null;
 
-    let resumeValue = null;
+    if (!selectedFile) {
+        alert('Please upload a resume first.');
+        return;
+    }
 
-    if (selectedFile) {
-        resumeValue = selectedFile.name;
+    const allowedExtensions = ['pdf', 'doc', 'docx'];
+    const fileNameLower = String(selectedFile.name || '').toLowerCase();
+    const extension = fileNameLower.split('.').pop() || '';
+
+    if (!allowedExtensions.includes(extension)) {
+        alert('Please upload a PDF or DOC/DOCX resume.');
+        return;
     }
 
     const { data: existingApplication, error: existingApplicationError } = await supabase
@@ -3293,7 +3380,26 @@ async function handleSubmitApplication() {
         return;
     }
 
-    const payload = buildPendingApplicationPayload(postId, applicantId, resumeValue);
+    let uploadedResume = null;
+
+    try {
+        uploadedResume = await uploadResumeToStorage(selectedFile, applicantId, postId);
+    } catch (uploadError) {
+        console.error('Failed to upload resume:', uploadError);
+        alert(`Failed to upload resume: ${uploadError.message}`);
+        return;
+    }
+
+    const resumeValue = uploadedResume?.publicUrl || null;
+
+    if (!resumeValue) {
+        alert('Failed to generate resume file URL.');
+        return;
+    }
+
+    const applicantName = await getApplicantFullName(applicantId);
+
+    const payload = buildPendingApplicationPayload(postId, applicantId, resumeValue, null);
 
     const { data: insertedApplication, error: insertError } = await supabase
         .from('ApplicationTbl')
@@ -3316,6 +3422,100 @@ async function handleSubmitApplication() {
     await loadNotifications();
 
     closeModal('applyModal');
+
+    try {
+        console.log('Starting AI scan...');
+        console.log('Resume URL:', resumeValue);
+        console.log('Selected file info:', {
+            name: selectedFile.name,
+            type: selectedFile.type,
+            size: selectedFile.size
+        });
+
+        const { data: postRow, error: postError } = await supabase
+            .from('JobPostTbl')
+            .select('*')
+            .eq('PostID', Number(postId))
+            .single();
+
+        if (postError || !postRow) {
+            throw new Error(postError?.message || 'Failed to load job post for AI scan.');
+        }
+
+        const aiJobPost = buildJobPostAIPayload(postRow);
+
+        if (!aiJobPost || !aiJobPost.JobTitle) {
+            throw new Error('AI job post payload is missing JobTitle.');
+        }
+
+        const apiUrl = `${getApiBaseUrl()}/api/resume-score`;
+        console.log('Calling API URL:', apiUrl);
+
+        let scanResponse;
+        try {
+            scanResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    applicantName,
+                    resumeUrl: resumeValue,
+                    fileName: selectedFile.name || '',
+                    mimeType: selectedFile.type || '',
+                    jobPost: aiJobPost
+                })
+            });
+        } catch (networkError) {
+            console.error('Network error while calling /api/resume-score:', networkError);
+            throw new Error(`Failed to reach resume scan API: ${networkError.message}`);
+        }
+
+        console.log('API status:', scanResponse.status);
+
+        const rawResponse = await scanResponse.text();
+        console.log('Raw API response:', rawResponse);
+
+        let scanData = null;
+
+        try {
+            scanData = JSON.parse(rawResponse);
+        } catch (parseError) {
+            throw new Error(`API returned non-JSON response: ${rawResponse.slice(0, 300)}`);
+        }
+
+        if (!scanResponse.ok || !scanData.ok) {
+            throw new Error(scanData.error || 'Failed to scan resume.');
+        }
+
+        const saveResult = await updateApplicationScores(
+            insertedApplication.JobApplicantID,
+            scanData.result
+        );
+
+        if (!saveResult) {
+            throw new Error('Failed to save AI scan results.');
+        }
+
+        const { error: resumeTextUpdateError } = await supabase
+            .from('ApplicationTbl')
+            .update({
+                ResumeText: scanData.resumeText || null
+            })
+            .eq('JobApplicantID', Number(insertedApplication.JobApplicantID));
+
+        if (resumeTextUpdateError) {
+            throw new Error(`Failed to save ResumeText: ${resumeTextUpdateError.message}`);
+        }
+
+        console.log('AI scan completed successfully.');
+    } catch (scanError) {
+        console.error('Resume scan error:', scanError);
+        await markApplicationScanFailed(
+            insertedApplication.JobApplicantID,
+            scanError.message || 'Unknown scan error'
+        );
+    }
 
     if (AppState.currentPage === 'home') {
         const jobs = await loadAllJobs();
@@ -3909,7 +4109,92 @@ function setPostFormFields(form, post) {
     );
 }
 
-function buildJobPostPayload(fields, imageUrl = '') {
+async function updateApplicationScores(jobApplicantId, result) {
+    const supabase = window.supabaseClient;
+    if (!supabase || !jobApplicantId || !result) return false;
+
+    const payload = {
+        SkillScore: result.SkillScore ?? null,
+        ExperienceScore: result.ExperienceScore ?? null,
+        EducationScore: result.EducationScore ?? null,
+        AchievementScore: result.AchievementScore ?? null,
+        AgeScore: result.AgeScore ?? null,
+        ResumeQualityScore: result.ResumeQualityScore ?? null,
+        TotalScore: result.TotalScore ?? null,
+        ResumeOverview: result.ResumeOverview || null,
+        OverallAssessment: result.OverallAssessment || null,
+        ScanStatus: 'Completed',
+        ScannedAt: new Date().toISOString(),
+        ScanError: null
+    };
+
+    const { error } = await supabase
+        .from('ApplicationTbl')
+        .update(payload)
+        .eq('JobApplicantID', Number(jobApplicantId));
+
+    if (error) {
+        console.error('Failed to update application scores:', error);
+        return false;
+    }
+
+    return true;
+}
+
+async function markApplicationScanFailed(jobApplicantId, errorMessage) {
+    const supabase = window.supabaseClient;
+    if (!supabase || !jobApplicantId) return false;
+
+    const { error } = await supabase
+        .from('ApplicationTbl')
+        .update({
+            ScanStatus: 'Failed',
+            ScanError: String(errorMessage || 'Unknown scan error'),
+            ScannedAt: null
+        })
+        .eq('JobApplicantID', Number(jobApplicantId));
+
+    if (error) {
+        console.error('Failed to mark scan as failed:', error);
+        return false;
+    }
+
+    return true;
+}
+
+async function scanApplicationWithLlama(jobApplicantId, postId, applicantName, resumeText) {
+    const supabase = window.supabaseClient;
+    if (!supabase || !jobApplicantId || !postId || !resumeText) return false;
+
+    const { data: postRow, error: postError } = await supabase
+        .from("JobPostTbl")
+        .select("*")
+        .eq("PostID", Number(postId))
+        .single();
+
+    if (postError || !postRow) {
+        console.error("Failed to load job post for AI scan:", postError);
+        await markApplicationScanFailed(jobApplicantId, postError?.message || "Job post not found");
+        return false;
+    }
+
+    try {
+        const result = await scoreResumeWithLlama({
+            applicantName,
+            resumeText,
+            jobPost: buildJobPostAIPayload(postRow)
+        });
+
+        const saved = await updateApplicationScores(jobApplicantId, result);
+        return saved;
+    } catch (error) {
+        console.error("Llama scan failed:", error);
+        await markApplicationScanFailed(jobApplicantId, error.message);
+        return false;
+    }
+}
+
+function buildJobPostInsertPayload(fields, imageUrl = '') {
     return {
         PostDescription: fields.postDescription,
         JobDescription: buildPostDisplayDescription(fields),
@@ -3933,10 +4218,39 @@ function buildJobPostPayload(fields, imageUrl = '') {
         ResumeQuality: fields.resumeQuality,
         Education: fields.education,
         Age: fields.age,
-        TargetScore: fields.targetScore || null,
+        TargetScore: Number(fields.targetScore) || null,
 
         PostDeadline: fields.postDeadline || null,
         JobImage: imageUrl || ''
+    };
+}
+
+function buildJobPostAIPayload(postRow) {
+    return {
+        PostID: Number(postRow.PostID),
+
+        JobTitle: postRow.JobTitle || '',
+        Department: postRow.Department || '',
+        DeploymentType: postRow.DeploymentType || '',
+        WorkSetup: postRow.WorkSetup || '',
+        DeploymentLocation: postRow.DeploymentLocation || '',
+        WorkingHours: postRow.WorkingHours || '',
+        SalaryRange: postRow.SalaryRange || '',
+        SlotsAvailable: postRow.SlotsAvailable || '',
+        IdealAge: postRow.IdealAge || null,
+        IdealEducationAttained: postRow.IdealEductaionAttained || null,
+        IdealYearsOfExperience: postRow.IdealYearsOfExperience || null,
+        IdealSkills: postRow.IdealSkills || '',
+        PostDescription: postRow.PostDescription || '',
+        JobDescription: postRow.JobDescription || '',
+        TargetScore: postRow.TargetScore || null,
+
+        Skills: Boolean(postRow.Skills),
+        Achievements: Boolean(postRow.Achievements),
+        Experience: Boolean(postRow.Experience),
+        ResumeQuality: Boolean(postRow.ResumeQuality),
+        Education: Boolean(postRow.Education),
+        Age: Boolean(postRow.Age)
     };
 }
 
@@ -4071,7 +4385,7 @@ async function initializeCreatePostPage() {
                     );
                 }
 
-                const payload = buildJobPostPayload(fields, jobImageUrl);
+                const payload = buildJobPostInsertPayload(fields, jobImageUrl);
                 payload.EmployerID = AppState.currentEmployerID;
                 payload.DatePosted = new Date().toISOString();
                 payload.AppliedCount = 0;
@@ -4199,7 +4513,7 @@ async function initializeEditPostPage() {
                     );
                 }
 
-                const payload = buildJobPostPayload(fields, jobImageUrl);
+                const payload = buildJobPostInsertPayload(fields, jobImageUrl);
 
                 const { error: updateError } = await supabase
                     .from('JobPostTbl')

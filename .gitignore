@@ -49,3 +49,5 @@ Thumbs.db
 # OPTIONAL UPLOADS
 # ==============================
 uploads/
+.vercel
+.env*.local

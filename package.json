@@ -1,0 +1,10 @@
+{
+  "name": "appl-ai",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "groq-sdk": "^0.18.0",
+    "pdf-parse": "^2.4.3",
+    "mammoth": "^1.11.0"
+  }
+}
