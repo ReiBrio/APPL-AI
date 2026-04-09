@@ -2504,13 +2504,6 @@ function sanitizeFileName(fileName) {
         .replace(/[^a-zA-Z0-9._-]/g, '');
 }
 
-function sanitizeFileName(fileName) {
-    return String(fileName || 'resume')
-        .trim()
-        .replace(/\s+/g, '_')
-        .replace(/[^a-zA-Z0-9._-]/g, '');
-}
-
 async function uploadResumeToStorage(file, applicantId, postId) {
     const supabase = window.supabaseClient;
 
