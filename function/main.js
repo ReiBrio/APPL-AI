@@ -3578,6 +3578,7 @@ async function populateEditProfileForm() {
         setInputByLabel(allInputs, 'Sex', (applicantRow.Gender || '').toLowerCase());
         setInputByLabel(allInputs, 'Birth Date', applicantRow.BirthDate || '');
         setInputByLabel(allInputs, 'Contact Number', applicantRow.ContactNumber || '');
+        setInputByLabel(allInputs, 'Education Attained', applicantRow.EducationAttained || '');
     }
 
     if (isEmployer()) {
@@ -3603,34 +3604,6 @@ async function populateEditProfileForm() {
         setInputByLabel(allInputs, 'Employer Email', employerRow.EmployerEmail || '');
         setInputByLabel(allInputs, 'Employer Contact Number', employerRow.EmployerContact || '');
     }
-}
-
-async function uploadProfileImage(file, userId) {
-    const supabase = window.supabaseClient;
-
-    if (!supabase || !file || !userId) {
-        throw new Error('Missing Supabase client, file, or user ID.');
-    }
-
-    const fileExt = file.name.split('.').pop() || 'png';
-    const filePath = `profile-images/user-${userId}-${Date.now()}.${fileExt}`;
-
-    const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: true
-        });
-
-    if (uploadError) {
-        throw uploadError;
-    }
-
-    const { data: publicUrlData } = supabase.storage
-        .from('profile-images')
-        .getPublicUrl(filePath);
-
-    return publicUrlData.publicUrl;
 }
 
 async function saveEditProfileForm(form) {
@@ -3684,7 +3657,8 @@ async function saveEditProfileForm(form) {
                 Address: getInputByLabel(allInputs, 'Address'),
                 Gender: getInputByLabel(allInputs, 'Sex'),
                 BirthDate: getInputByLabel(allInputs, 'Birth Date'),
-                ContactNumber: getInputByLabel(allInputs, 'Contact Number')
+                ContactNumber: getInputByLabel(allInputs, 'Contact Number'),
+                EducationAttained: getInputByLabel(allInputs, 'Education Attained')
             };
 
             const { error: applicantError } = await supabase
@@ -3745,6 +3719,34 @@ async function saveEditProfileForm(form) {
         console.error('Save profile error:', error);
         alert(`Failed to save profile: ${error.message}`);
     }
+}
+
+async function uploadProfileImage(file, userId) {
+    const supabase = window.supabaseClient;
+
+    if (!supabase || !file || !userId) {
+        throw new Error('Missing Supabase client, file, or user ID.');
+    }
+
+    const fileExt = file.name.split('.').pop() || 'png';
+    const filePath = `profile-images/user-${userId}-${Date.now()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('profile-images')
+        .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: true
+        });
+
+    if (uploadError) {
+        throw uploadError;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+        .from('profile-images')
+        .getPublicUrl(filePath);
+
+    return publicUrlData.publicUrl;
 }
 
 function buildPostDisplayDescription(fields) {
