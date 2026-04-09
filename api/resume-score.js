@@ -1,5 +1,4 @@
 import Groq from "groq-sdk";
-import pdfParse from "pdf-parse";
 import mammoth from "mammoth";
 
 function safeNumber(value) {
@@ -37,14 +36,67 @@ function computeTotalScore(result, enabledCriteria) {
     return Math.round(total * 100) / 100;
 }
 
+function cleanAIJson(text) {
+    const raw = String(text || "").trim();
+
+    if (!raw) {
+        throw new Error("AI returned empty content.");
+    }
+
+    try {
+        return JSON.parse(raw);
+    } catch {
+        const cleaned = raw
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+
+        return JSON.parse(cleaned);
+    }
+}
+
+async function extractPdfText(buffer) {
+    console.log("[resume-score] PDF branch started");
+
+    const pdfModule = await import("pdf-parse");
+    const PDFParseClass = pdfModule.PDFParse || pdfModule.default?.PDFParse;
+
+    if (!PDFParseClass) {
+        throw new Error("pdf-parse v2 API not found.");
+    }
+
+    let parser;
+
+    try {
+        parser = new PDFParseClass({ data: buffer });
+        const result = await parser.getText();
+        const text = String(result?.text || "").trim();
+
+        if (!text) {
+            throw new Error("PDF parsed but no text was extracted.");
+        }
+
+        return text;
+    } finally {
+        if (parser && typeof parser.destroy === "function") {
+            try {
+                await parser.destroy();
+            } catch (error) {
+                console.warn("[resume-score] parser destroy warning:", error);
+            }
+        }
+    }
+}
+
 async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "") {
     if (!resumeUrl) {
         throw new Error("Missing resume URL.");
     }
 
-    console.log("Fetching resume URL:", resumeUrl);
-    console.log("File name:", fileName);
-    console.log("Mime type:", mimeType);
+    console.log("[resume-score] Fetching resume URL:", resumeUrl);
+    console.log("[resume-score] File name:", fileName);
+    console.log("[resume-score] Mime type:", mimeType);
 
     const response = await fetch(resumeUrl);
 
@@ -55,7 +107,7 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    console.log("Downloaded resume bytes:", buffer.length);
+    console.log("[resume-score] Downloaded resume bytes:", buffer.length);
 
     const normalizedFileName = String(fileName || "").toLowerCase();
     const normalizedMimeType = String(mimeType || "").toLowerCase();
@@ -65,37 +117,26 @@ async function extractResumeTextFromUrl(resumeUrl, fileName = "", mimeType = "")
         normalizedFileName.endsWith(".pdf");
 
     const isDocx =
-        normalizedMimeType.includes("word") ||
-        normalizedMimeType.includes("document") ||
+        normalizedMimeType.includes("wordprocessingml") ||
+        normalizedMimeType.includes("officedocument") ||
         normalizedFileName.endsWith(".docx");
 
-    const isTxt =
-        normalizedMimeType.includes("text/plain") ||
-        normalizedFileName.endsWith(".txt");
-
     if (isPdf) {
-        console.log("Parsing as PDF...");
-        const parsed = await pdfParse(buffer);
-        return String(parsed.text || "").trim();
+        return await extractPdfText(buffer);
     }
 
     if (isDocx) {
-        console.log("Parsing as DOCX...");
+        console.log("[resume-score] Parsing as DOCX");
         const parsed = await mammoth.extractRawText({ buffer });
         return String(parsed.value || "").trim();
     }
 
-    if (isTxt) {
-        console.log("Parsing as TXT...");
-        return buffer.toString("utf-8").trim();
-    }
-
-    throw new Error("Unsupported resume format. Please upload PDF, DOCX, or TXT.");
+    throw new Error("Unsupported resume format. Please upload PDF or DOCX only.");
 }
 
 export default async function handler(req, res) {
     try {
-        console.log("resume-score invoked");
+        console.log("[resume-score] invoked");
 
         if (req.method !== "POST") {
             return res.status(405).json({
@@ -120,10 +161,10 @@ export default async function handler(req, res) {
             jobPost = {}
         } = req.body || {};
 
-        console.log("Incoming payload keys:", Object.keys(req.body || {}));
-        console.log("Job title:", jobPost?.JobTitle || null);
-        console.log("Has resumeText:", Boolean(String(resumeText || "").trim()));
-        console.log("Has resumeUrl:", Boolean(String(resumeUrl || "").trim()));
+        console.log("[resume-score] Incoming payload keys:", Object.keys(req.body || {}));
+        console.log("[resume-score] Job title:", jobPost?.JobTitle || null);
+        console.log("[resume-score] Has resumeText:", Boolean(String(resumeText || "").trim()));
+        console.log("[resume-score] Has resumeUrl:", Boolean(String(resumeUrl || "").trim()));
 
         if (!jobPost || typeof jobPost !== "object") {
             return res.status(400).json({
@@ -188,7 +229,7 @@ ${applicantName}
 
 Resume Text:
 ${finalResumeText}
-`;
+`.trim();
 
         const groq = new Groq({
             apiKey: process.env.GROQ_API_KEY
@@ -206,18 +247,17 @@ ${finalResumeText}
             stream: false
         });
 
-        const content = completion.choices?.[0]?.message?.content || "";
-
-        console.log("Groq raw content preview:", String(content).slice(0, 300));
+        const content = completion?.choices?.[0]?.message?.content || "";
+        console.log("[resume-score] Groq raw preview:", String(content).slice(0, 300));
 
         let parsed;
         try {
-            parsed = JSON.parse(content);
-        } catch {
+            parsed = cleanAIJson(content);
+        } catch (error) {
             return res.status(500).json({
                 ok: false,
-                error: "Invalid JSON from AI",
-                raw: content
+                error: `Invalid JSON from AI: ${error.message}`,
+                raw: String(content).slice(0, 1200)
             });
         }
 
@@ -240,8 +280,8 @@ ${finalResumeText}
             resumeText: finalResumeText
         });
     } catch (error) {
-        console.error("resume-score.js crash:", error);
-        console.error("resume-score.js stack:", error?.stack);
+        console.error("[resume-score] crash:", error);
+        console.error("[resume-score] stack:", error?.stack);
 
         return res.status(500).json({
             ok: false,
