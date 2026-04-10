@@ -3579,6 +3579,35 @@ async function handleSubmitApplication() {
         .select('JobApplicantID, PostID, ApplicationStatus')
         .single();
 
+    const appliedStatus = insertedApplication?.ApplicationStatus || 'Pending';
+
+    const alreadyExists = AppState.appliedJobs.some(
+        item => Number(item.PostID) === Number(postId)
+    );
+
+    if (!alreadyExists) {
+        AppState.appliedJobs.push({
+            PostID: Number(postId),
+            Status: appliedStatus
+        });
+    } else {
+        AppState.appliedJobs = AppState.appliedJobs.map(item => {
+            if (Number(item.PostID) === Number(postId)) {
+                return {
+                    ...item,
+                    Status: appliedStatus
+                };
+            }
+            return item;
+        });
+    }
+
+    if (!AppState.appliedJobsMap) {
+        AppState.appliedJobsMap = new Map();
+    }
+
+    AppState.appliedJobsMap.set(Number(postId), appliedStatus);
+
     if (insertError) {
         console.error('Failed to submit application:', insertError);
 
