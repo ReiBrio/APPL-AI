@@ -496,14 +496,8 @@ function setupEventListeners() {
 // ANCHOR COMPONENT LOADING SYSTEM
 // ============================================
 function handleResponsiveSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    if (!sidebar) return;
-
-    if (window.innerWidth <= 1200) {
-        sidebar.classList.add('hidden');
-    } else {
-        sidebar.classList.remove('hidden');
-    }
+    if (isFocusModePage()) return;
+    applyLayoutState();
 }
 
 async function loadComponent(name) {
@@ -2910,6 +2904,49 @@ function formatPostDates(datePosted, deadline) {
     return '';
 }
 
+function isFocusModePage(pageName = AppState.currentPage) {
+    return [
+        'profile',
+        'profile-employer',
+        'edit-profile',
+        'edit-profile-employer',
+        'create-post',
+        'edit-post',
+        'view-applicants',
+        'view-application'
+    ].includes(pageName);
+}
+
+function applyLayoutState(pageName = AppState.currentPage) {
+    const sidebar = document.getElementById('sidebar');
+    const featuredSidebar = document.getElementById('featuredSidebar');
+    const mainContent = document.getElementById('mainContent');
+
+    const focusMode = isFocusModePage(pageName);
+    const isMobileLayout = window.innerWidth <= 1200;
+
+    if (mainContent) {
+        mainContent.classList.toggle('focus-mode', focusMode);
+    }
+
+    if (featuredSidebar) {
+        featuredSidebar.classList.toggle('focus-mode', focusMode);
+    }
+
+    if (!sidebar) return;
+
+    if (focusMode) {
+        sidebar.classList.add('hidden');
+        return;
+    }
+
+    if (isMobileLayout) {
+        sidebar.classList.add('hidden');
+    } else {
+        sidebar.classList.remove('hidden');
+    }
+}
+
 // ============================================
 // ANCHOR PAGE NAVIGATION SYSTEM
 // ============================================
@@ -2926,30 +2963,7 @@ function loadPage(pageName) {
         activeLink.classList.add('active');
     }
 
-    const layoutMode = [
-        'profile',
-        'profile-employer',
-        'edit-profile',
-        'edit-profile-employer',
-        'create-post',
-        'edit-post',
-        'view-applicants',
-        'view-application'
-    ].includes(pageName);
-
-    const sidebar = document.getElementById('sidebar');
-    const featuredSidebar = document.getElementById('featuredSidebar');
-    const mainContent = document.getElementById('mainContent');
-
-    if (layoutMode) {
-        if (sidebar) sidebar.classList.add('hidden');
-        if (featuredSidebar) featuredSidebar.classList.add('focus-mode');
-        if (mainContent) mainContent.classList.add('focus-mode');
-    } else {
-        if (sidebar) sidebar.classList.remove('hidden');
-        if (featuredSidebar) featuredSidebar.classList.remove('focus-mode');
-        if (mainContent) mainContent.classList.remove('focus-mode');
-    }
+    applyLayoutState(pageName);
 
     let pageFile = pageName;
 
@@ -2969,6 +2983,7 @@ function loadPage(pageName) {
             if (content) {
                 content.innerHTML = html;
                 initializePageSpecificEvents(pageName);
+                applyLayoutState(pageName);
             }
         })
         .catch(error => {
@@ -2976,7 +2991,7 @@ function loadPage(pageName) {
             const content = document.getElementById('mainContent');
             if (content) {
                 content.innerHTML = `
-                    <div class="page-content">
+                    <div class="pageContent">
                         <div class="page-simple">
                             <h2>Page Not Found</h2>
                             <p>The requested page could not be loaded.</p>
@@ -3082,9 +3097,11 @@ function updateRoleBasedUI() {
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    if (sidebar) {
-        sidebar.classList.toggle('hidden');
-    }
+    if (!sidebar) return;
+
+    if (isFocusModePage()) return;
+
+    sidebar.classList.toggle('hidden');
 }
 
 function openSearch() {
