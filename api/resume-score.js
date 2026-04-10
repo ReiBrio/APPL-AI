@@ -178,40 +178,54 @@ export default async function handler(req, res) {
         const enabledCriteria = getEnabledCriteria(jobPost);
 
         const prompt = `
-You are an AI resume evaluator for APPL-AI.
+        You are an AI resume evaluator for APPL-AI.
 
-Return ONLY valid JSON in this exact shape:
-{
-  "SkillScore": null,
-  "ExperienceScore": null,
-  "EducationScore": null,
-  "AchievementScore": null,
-  "AgeScore": null,
-  "ResumeQualityScore": null,
-  "ResumeOverview": "",
-  "OverallAssessment": ""
-}
+        Evaluate the applicant using ONLY the enabled criteria listed below.
+        If a criterion is disabled, set its score to null and do not consider it in the assessment.
 
-Rules:
-- Enabled scores must be integers from 0 to 100
-- Disabled scores must be null
-- Do not use markdown
-- Do not use code fences
-- Do not add extra keys
-- Be strict but fair
+        Return ONLY valid JSON in this exact shape:
+        {
+        "SkillScore": null,
+        "ExperienceScore": null,
+        "EducationScore": null,
+        "AchievementScore": null,
+        "AgeScore": null,
+        "ResumeQualityScore": null,
+        "ResumeOverview": "",
+        "OverallAssessment": ""
+        }
 
-Enabled criteria:
-${enabledCriteria.join(", ") || "none"}
+        Rules:
+        - Enabled scores must be integers from 0 to 100
+        - Disabled scores must be null
+        - Do not use markdown
+        - Do not use code fences
+        - Do not add extra keys
+        - Do not guess missing facts
+        - Base all scoring only on the resume text and the job post
+        - If a required detail is missing from the resume, score that criterion lower
+        - Ignore disabled criteria completely
 
-Job Post:
-${JSON.stringify(jobPost, null, 2)}
+        Scoring guidance:
+        - SkillScore: match between resume skills and job-required skills
+        - ExperienceScore: relevance and strength of past work to the role
+        - EducationScore: relevance of education to the role
+        - AchievementScore: measurable accomplishments and impact
+        - AgeScore: only score if age is explicitly required in the job post and supported by the resume
+        - ResumeQualityScore: clarity, organization, grammar, and professionalism
 
-Applicant Name:
-${applicantName}
+        Enabled criteria:
+        ${enabledCriteria.join(", ") || "none"}
 
-Resume Text:
-${finalResumeText}
-`.trim();
+        Job Post:
+        ${JSON.stringify(jobPost, null, 2)}
+
+        Applicant Name:
+        ${applicantName}
+
+        Resume Text:
+        ${finalResumeText}
+        `.trim();
 
         const groq = new Groq({
             apiKey: process.env.GROQ_API_KEY
