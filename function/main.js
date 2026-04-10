@@ -38,6 +38,9 @@ document.addEventListener('DOMContentLoaded', async function () {
     initializeApp();
     setupEventListeners();
 
+    handleResponsiveSidebar(); 
+    window.addEventListener('resize', handleResponsiveSidebar);
+
     await loadCurrentUser();
 
     loadFeaturedCompanies();
@@ -472,11 +475,36 @@ function setupEventListeners() {
             return;
         }
     });
+
+    document.addEventListener('click', function (e) {
+        const overlay = e.target.closest('[data-close-image-preview="true"]');
+        const previewContent = e.target.closest('.imagePreviewContent');
+
+        if (overlay && !previewContent) {
+            closeImagePreview();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeImagePreview();
+        }
+    });
 }
 
 // ============================================
 // ANCHOR COMPONENT LOADING SYSTEM
 // ============================================
+function handleResponsiveSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    if (!sidebar) return;
+
+    if (window.innerWidth <= 1200) {
+        sidebar.classList.add('hidden');
+    } else {
+        sidebar.classList.remove('hidden');
+    }
+}
 
 async function loadComponent(name) {
     if (AppState.componentCache[name]) {
@@ -3107,6 +3135,39 @@ function closeModal(modalId) {
         AppState.selectedJobId = null;
         updateResumeFilePreview(null);
     }
+
+    if (modalId === 'imagePreviewModal') {
+        closeImagePreview();
+    }
+}
+
+function openImagePreview(imageSrc, imageAlt = 'Post image') {
+    const modal = document.getElementById('imagePreviewModal');
+    const previewImg = document.getElementById('imagePreviewImg');
+
+    if (!modal || !previewImg || !imageSrc) return;
+
+    previewImg.src = imageSrc;
+    previewImg.alt = imageAlt;
+    modal.classList.add('active');
+
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImagePreview() {
+    const modal = document.getElementById('imagePreviewModal');
+    const previewImg = document.getElementById('imagePreviewImg');
+
+    if (modal) {
+        modal.classList.remove('active');
+    }
+
+    if (previewImg) {
+        previewImg.src = '';
+        previewImg.alt = 'Post preview image';
+    }
+
+    document.body.style.overflow = '';
 }
 
 // ============================================
@@ -3189,6 +3250,19 @@ function initializeJobCardEvents() {
             e.stopPropagation();
             const jobId = this.getAttribute('data-remove');
             removeJobFromFeed(jobId);
+        });
+    });
+
+    document.querySelectorAll('.previewPostImage').forEach(imageBox => {
+        imageBox.addEventListener('click', function (e) {
+            e.stopPropagation();
+
+            const imageSrc = this.getAttribute('data-image');
+            const imageAlt = this.getAttribute('data-alt') || 'Post image';
+
+            if (!imageSrc || !imageSrc.trim()) return;
+
+            openImagePreview(imageSrc, imageAlt);
         });
     });
 
