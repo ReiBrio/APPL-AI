@@ -496,7 +496,6 @@ function setupEventListeners() {
 // ANCHOR COMPONENT LOADING SYSTEM
 // ============================================
 function handleResponsiveSidebar() {
-    if (isFocusModePage()) return;
     applyLayoutState();
 }
 
@@ -2935,15 +2934,26 @@ function applyLayoutState(pageName = AppState.currentPage) {
 
     if (!sidebar) return;
 
+    const sidebarWasManuallyOpened = sidebar.classList.contains('manual-open');
+
     if (focusMode) {
-        sidebar.classList.add('hidden');
+        if (sidebarWasManuallyOpened) {
+            sidebar.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('hidden');
+        }
         return;
     }
 
     if (isMobileLayout) {
-        sidebar.classList.add('hidden');
+        if (sidebarWasManuallyOpened) {
+            sidebar.classList.remove('hidden');
+        } else {
+            sidebar.classList.add('hidden');
+        }
     } else {
         sidebar.classList.remove('hidden');
+        sidebar.classList.remove('manual-open');
     }
 }
 
@@ -3099,9 +3109,13 @@ function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
 
-    if (isFocusModePage()) return;
-
-    sidebar.classList.toggle('hidden');
+    if (sidebar.classList.contains('hidden')) {
+        sidebar.classList.remove('hidden');
+        sidebar.classList.add('manual-open');
+    } else {
+        sidebar.classList.add('hidden');
+        sidebar.classList.remove('manual-open');
+    }
 }
 
 function openSearch() {
