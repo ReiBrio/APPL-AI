@@ -13,11 +13,8 @@ const AppState = {
     viewedProfile: null,
     selectedJobId: null,
     savedJobs: [],
-    savedJobsSet: new Set(),
     appliedJobs: [],
-    appliedJobsMap: new Map(),
     componentCache: {},
-    componentPromises: {},
     pendingProfileImage: '',
     pendingProfileImageFile: null,
     pendingPostImage: '',
@@ -34,8 +31,6 @@ const ComponentData = {
     companies: []
 };
 
-let responsiveSidebarTimer = null;
-
 // ============================================
 // ANCHOR APPLICATION INITIALIZATION
 // ============================================
@@ -43,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     initializeApp();
     setupEventListeners();
 
-    handleResponsiveSidebar();
+    handleResponsiveSidebar(); 
     window.addEventListener('resize', handleResponsiveSidebar);
 
     await loadCurrentUser();
@@ -200,32 +195,25 @@ async function loadUserJobRelations() {
     const supabase = window.supabaseClient;
 
     AppState.savedJobs = [];
-    AppState.savedJobsSet = new Set();
     AppState.appliedJobs = [];
-    AppState.appliedJobsMap = new Map();
 
     if (!supabase || !AppState.currentApplicantID) return;
 
-    const [savedResult, applicationResult] = await Promise.all([
-        supabase
-            .from('SavedPostTbl')
-            .select('PostID')
-            .eq('ApplicantID', AppState.currentApplicantID),
-        supabase
-            .from('ApplicationTbl')
-            .select('PostID, ApplicationStatus')
-            .eq('ApplicantID', AppState.currentApplicantID)
-    ]);
-
-    const { data: savedRows, error: savedError } = savedResult;
-    const { data: applicationRows, error: applicationError } = applicationResult;
+    const { data: savedRows, error: savedError } = await supabase
+        .from('SavedPostTbl')
+        .select('PostID')
+        .eq('ApplicantID', AppState.currentApplicantID);
 
     if (savedError) {
         console.error('Error loading saved jobs:', savedError);
     } else {
         AppState.savedJobs = (savedRows || []).map(row => Number(row.PostID));
-        AppState.savedJobsSet = new Set(AppState.savedJobs);
     }
+
+    const { data: applicationRows, error: applicationError } = await supabase
+        .from('ApplicationTbl')
+        .select('PostID, ApplicationStatus')
+        .eq('ApplicantID', AppState.currentApplicantID);
 
     if (applicationError) {
         console.error('Error loading applied jobs:', applicationError);
@@ -234,22 +222,20 @@ async function loadUserJobRelations() {
             PostID: Number(row.PostID),
             Status: row.ApplicationStatus || 'Pending'
         }));
-        AppState.appliedJobsMap = new Map(
-            AppState.appliedJobs.map(row => [Number(row.PostID), row.Status || 'Pending'])
-        );
     }
 }
 
 function isJobSavedByCurrentUser(postId) {
-    return AppState.savedJobsSet.has(Number(postId));
+    return AppState.savedJobs.includes(Number(postId));
 }
 
 function isJobAppliedByCurrentUser(postId) {
-    return AppState.appliedJobsMap.has(Number(postId));
+    return AppState.appliedJobs.some(item => Number(item.PostID) === Number(postId));
 }
 
 function getAppliedStatus(postId) {
-    return AppState.appliedJobsMap.get(Number(postId)) || '';
+    const row = AppState.appliedJobs.find(item => Number(item.PostID) === Number(postId));
+    return row ? row.Status : '';
 }
 
 // ============================================
@@ -405,7 +391,7 @@ function setupEventListeners() {
 
             return;
         }
-
+        
         const jobProfile = e.target.closest('.clickableProfile');
         if (jobProfile) {
             const userId = jobProfile.getAttribute('data-user-id');
@@ -510,10 +496,7 @@ function setupEventListeners() {
 // ANCHOR COMPONENT LOADING SYSTEM
 // ============================================
 function handleResponsiveSidebar() {
-    clearTimeout(responsiveSidebarTimer);
-    responsiveSidebarTimer = setTimeout(() => {
-        applyLayoutState();
-    }, 100);
+    applyLayoutState();
 }
 
 async function loadComponent(name) {
@@ -521,23 +504,11 @@ async function loadComponent(name) {
         return AppState.componentCache[name];
     }
 
-    if (AppState.componentPromises[name]) {
-        return AppState.componentPromises[name];
-    }
+    const res = await fetch(`components/${name}.html`);
+    const html = await res.text();
 
-    AppState.componentPromises[name] = fetch(`components/${name}.html`)
-        .then(res => res.text())
-        .then(html => {
-            AppState.componentCache[name] = html;
-            delete AppState.componentPromises[name];
-            return html;
-        })
-        .catch(error => {
-            delete AppState.componentPromises[name];
-            throw error;
-        });
-
-    return AppState.componentPromises[name];
+    AppState.componentCache[name] = html;
+    return html;
 }
 
 function renderTemplate(template, data) {
@@ -566,7 +537,6 @@ async function loadJobCards(containerId, jobsData = []) {
     }
 
     const ownProfile = isOwnProfile();
-    let html = '';
 
     jobsData.forEach(job => {
         const postId = Number(job.id);
@@ -631,17 +601,16 @@ async function loadJobCards(containerId, jobsData = []) {
             jobImage: job.image || '',
             dateRange: job.date || '',
             appliedCount: job.appliedCount || 0,
-            saveClass: showSaveButton && isSaved ? 'saved' : '',
-            saveFill: showSaveButton && isSaved ? 'currentColor' : 'none',
+            saveClass: isSaved ? 'saved' : '',
+            saveFill: isSaved ? 'currentColor' : 'none',
             employerActions,
             statusBadge,
             applyButton
         };
 
-        html += renderTemplate(template, data);
+        const rendered = renderTemplate(template, data);
+        container.innerHTML += rendered;
     });
-
-    container.innerHTML = html;
 
     initializeJobCardEvents();
     initializeDescriptionToggles(container);
@@ -684,8 +653,6 @@ async function loadApplicantCards(containerId, applicantsData = []) {
         return;
     }
 
-    let html = '';
-
     applicantsData.forEach(applicant => {
         const matchMeta = getMatchBadgeMeta(applicant.totalScore, applicant.targetScore);
         const applicationMeta = getApplicationStatusBadgeMeta(applicant.applicationStatus);
@@ -699,10 +666,9 @@ async function loadApplicantCards(containerId, applicantsData = []) {
             ...applicationMeta
         };
 
-        html += renderTemplate(template, cardData);
+        const rendered = renderTemplate(template, cardData);
+        container.innerHTML += rendered;
     });
-
-    container.innerHTML = html;
 }
 
 async function loadNotifications() {
@@ -749,44 +715,40 @@ async function loadNotifications() {
             notifRows.map(row => Number(row.SentBy)).filter(Boolean)
         )];
 
+        let senderMap = {};
+        if (senderIds.length > 0) {
+            const { data: senderRows, error: senderError } = await supabase
+                .from('UserTbl')
+                .select('UserID, Username, UserImage')
+                .in('UserID', senderIds);
+
+            if (senderError) {
+                console.error('Failed to load sender rows:', senderError);
+            } else {
+                (senderRows || []).forEach(row => {
+                    senderMap[Number(row.UserID)] = row;
+                });
+            }
+        }
+
         const postIds = [...new Set(
             notifRows.map(row => Number(row.PostID)).filter(Boolean)
         )];
 
-        const [senderResult, postResult] = await Promise.all([
-            senderIds.length > 0
-                ? supabase
-                    .from('UserTbl')
-                    .select('UserID, Username, UserImage')
-                    .in('UserID', senderIds)
-                : Promise.resolve({ data: [], error: null }),
-            postIds.length > 0
-                ? supabase
-                    .from('JobPostTbl')
-                    .select('PostID, JobTitle')
-                    .in('PostID', postIds)
-                : Promise.resolve({ data: [], error: null })
-        ]);
-
-        const { data: senderRows, error: senderError } = senderResult;
-        const { data: postRows, error: postError } = postResult;
-
-        let senderMap = {};
-        if (senderError) {
-            console.error('Failed to load sender rows:', senderError);
-        } else {
-            (senderRows || []).forEach(row => {
-                senderMap[Number(row.UserID)] = row;
-            });
-        }
-
         let postMap = {};
-        if (postError) {
-            console.error('Failed to load post rows for notifications:', postError);
-        } else {
-            (postRows || []).forEach(row => {
-                postMap[Number(row.PostID)] = row;
-            });
+        if (postIds.length > 0) {
+            const { data: postRows, error: postError } = await supabase
+                .from('JobPostTbl')
+                .select('PostID, JobTitle')
+                .in('PostID', postIds);
+
+            if (postError) {
+                console.error('Failed to load post rows for notifications:', postError);
+            } else {
+                (postRows || []).forEach(row => {
+                    postMap[Number(row.PostID)] = row;
+                });
+            }
         }
 
         const now = Date.now();
@@ -1013,10 +975,8 @@ async function loadFeaturedCompanies() {
             userMap[user.UserID] = user;
         });
 
-        let html = '';
-
         (employerRows || []).forEach(employer => {
-            html += renderTemplate(template, {
+            const rendered = renderTemplate(template, {
                 companyName: employer.CompanyName,
                 companyIndustry: employer.CompanyIndustry,
                 companyImage: userMap[employer.UserID]?.UserImage || 'assets/default-company.png',
@@ -1024,9 +984,9 @@ async function loadFeaturedCompanies() {
                 userId: employer.UserID,
                 userType: 'employer'
             });
-        });
 
-        container.innerHTML = html;
+            container.innerHTML += rendered;
+        });
     } catch (error) {
         console.error(error);
         container.innerHTML = '<p>Failed to load featured companies.</p>';
@@ -1055,17 +1015,14 @@ async function loadAllJobs() {
         if (!postRows || postRows.length === 0) return [];
 
         const postIds = postRows.map(post => Number(post.PostID));
+        const applicationCountsMap = await getApplicationCountsMap(postIds);
+
         const employerIds = [...new Set(postRows.map(post => post.EmployerID).filter(Boolean))];
 
-        const [applicationCountsMap, employerResult] = await Promise.all([
-            getApplicationCountsMap(postIds),
-            supabase
-                .from('EmployerTbl')
-                .select('EmployerID, UserID, CompanyName, CompanyIndustry')
-                .in('EmployerID', employerIds)
-        ]);
-
-        const { data: employerRows, error: employerError } = employerResult;
+        const { data: employerRows, error: employerError } = await supabase
+            .from('EmployerTbl')
+            .select('EmployerID, UserID, CompanyName, CompanyIndustry')
+            .in('EmployerID', employerIds);
 
         if (employerError) {
             console.error('Failed to load employers:', employerError);
@@ -1160,27 +1117,23 @@ async function loadProfileJobs() {
                 return;
             }
 
-            const [postResult, userResult] = await Promise.all([
-                supabase
-                    .from('JobPostTbl')
-                    .select('*')
-                    .eq('EmployerID', employerRow.EmployerID)
-                    .order('DatePosted', { ascending: false }),
-                supabase
-                    .from('UserTbl')
-                    .select('UserImage')
-                    .eq('UserID', employerRow.UserID)
-                    .single()
-            ]);
-
-            const { data: postRows, error: postError } = postResult;
-            const { data: userRow, error: userError } = userResult;
+            const { data: postRows, error: postError } = await supabase
+                .from('JobPostTbl')
+                .select('*')
+                .eq('EmployerID', employerRow.EmployerID)
+                .order('DatePosted', { ascending: false });
 
             if (postError) {
                 console.error('Failed to load employer posts:', postError);
                 await loadJobCards(containerId, []);
                 return;
             }
+
+            const { data: userRow, error: userError } = await supabase
+                .from('UserTbl')
+                .select('UserImage')
+                .eq('UserID', employerRow.UserID)
+                .single();
 
             if (userError) {
                 console.error('Failed to load employer user image:', userError);
@@ -1256,15 +1209,10 @@ async function loadProfileJobs() {
 
             const employerIds = [...new Set((postRows || []).map(post => post.EmployerID).filter(Boolean))];
 
-            const [employerResult, applicationCountsMap] = await Promise.all([
-                supabase
-                    .from('EmployerTbl')
-                    .select('EmployerID, UserID, CompanyName, CompanyIndustry')
-                    .in('EmployerID', employerIds),
-                getApplicationCountsMap(postIds)
-            ]);
-
-            const { data: employerRows, error: employerRowsError } = employerResult;
+            const { data: employerRows, error: employerRowsError } = await supabase
+                .from('EmployerTbl')
+                .select('EmployerID, UserID, CompanyName, CompanyIndustry')
+                .in('EmployerID', employerIds);
 
             if (employerRowsError) {
                 console.error('Failed to load employers for applicant profile:', employerRowsError);
@@ -1294,6 +1242,8 @@ async function loadProfileJobs() {
                     });
                 }
             }
+
+            const applicationCountsMap = await getApplicationCountsMap(postIds);
 
             const jobs = (postRows || []).map(post => {
                 const employer = employerMap[post.EmployerID] || {};
@@ -1502,52 +1452,44 @@ async function syncApplicationSubmittedNotification(jobApplicantId) {
         return false;
     }
 
-    const [postResult, applicantResult] = await Promise.all([
-        supabase
-            .from('JobPostTbl')
-            .select('PostID, JobTitle, EmployerID')
-            .eq('PostID', Number(applicationRow.PostID))
-            .single(),
-        supabase
-            .from('ApplicantTbl')
-            .select('ApplicantID, UserID')
-            .eq('ApplicantID', Number(applicationRow.ApplicantID))
-            .single()
-    ]);
-
-    const { data: postRow, error: postError } = postResult;
-    const { data: applicantUserRow, error: applicantUserError } = applicantResult;
+    const { data: postRow, error: postError } = await supabase
+        .from('JobPostTbl')
+        .select('PostID, JobTitle, EmployerID')
+        .eq('PostID', Number(applicationRow.PostID))
+        .single();
 
     if (postError || !postRow) {
         console.error('Failed to load post for submitted notification:', postError);
         return false;
     }
 
-    if (applicantUserError || !applicantUserRow) {
-        console.error('Failed to load applicant row for submitted notification:', applicantUserError);
-        return false;
-    }
-
-    const [employerResult, userResult] = await Promise.all([
-        supabase
-            .from('EmployerTbl')
-            .select('EmployerID, UserID')
-            .eq('EmployerID', Number(postRow.EmployerID))
-            .single(),
-        supabase
-            .from('UserTbl')
-            .select('UserID, Username')
-            .eq('UserID', Number(applicantUserRow.UserID))
-            .single()
-    ]);
-
-    const { data: employerRow, error: employerError } = employerResult;
-    const { data: userRow, error: userError } = userResult;
+    const { data: employerRow, error: employerError } = await supabase
+        .from('EmployerTbl')
+        .select('EmployerID, UserID')
+        .eq('EmployerID', Number(postRow.EmployerID))
+        .single();
 
     if (employerError || !employerRow) {
         console.error('Failed to load employer for submitted notification:', employerError);
         return false;
     }
+
+    const { data: applicantUserRow, error: applicantUserError } = await supabase
+        .from('ApplicantTbl')
+        .select('ApplicantID, UserID')
+        .eq('ApplicantID', Number(applicationRow.ApplicantID))
+        .single();
+
+    if (applicantUserError || !applicantUserRow) {
+        console.error('Failed to load applicant row for submitted notification:', applicantUserError);
+        return false;
+    }
+
+    const { data: userRow, error: userError } = await supabase
+        .from('UserTbl')
+        .select('UserID, Username')
+        .eq('UserID', Number(applicantUserRow.UserID))
+        .single();
 
     if (userError || !userRow) {
         console.error('Failed to load applicant user for submitted notification:', userError);
@@ -1600,26 +1542,22 @@ async function syncApplicationStatusNotification(jobApplicantId, newStatus) {
         return false;
     }
 
-    const [applicantResult, postResult] = await Promise.all([
-        supabase
-            .from('ApplicantTbl')
-            .select('ApplicantID, UserID')
-            .eq('ApplicantID', Number(applicationRow.ApplicantID))
-            .single(),
-        supabase
-            .from('JobPostTbl')
-            .select('PostID, JobTitle, EmployerID')
-            .eq('PostID', Number(applicationRow.PostID))
-            .single()
-    ]);
-
-    const { data: applicantRow, error: applicantError } = applicantResult;
-    const { data: postRow, error: postError } = postResult;
+    const { data: applicantRow, error: applicantError } = await supabase
+        .from('ApplicantTbl')
+        .select('ApplicantID, UserID')
+        .eq('ApplicantID', Number(applicationRow.ApplicantID))
+        .single();
 
     if (applicantError || !applicantRow) {
         console.error('Failed to load applicant for status notification:', applicantError);
         return false;
     }
+
+    const { data: postRow, error: postError } = await supabase
+        .from('JobPostTbl')
+        .select('PostID, JobTitle, EmployerID')
+        .eq('PostID', Number(applicationRow.PostID))
+        .single();
 
     if (postError || !postRow) {
         console.error('Failed to load post for status notification:', postError);
@@ -1708,22 +1646,20 @@ async function cancelApplication(postId) {
     }
 
     if (applicationRow?.JobApplicantID) {
-        await Promise.all([
-            deleteNotificationByType({
-                notificationType: 'application_submitted',
-                jobApplicantId: Number(applicationRow.JobApplicantID)
-            }),
-            deleteNotificationByType({
-                notificationType: 'application_status_updated',
-                jobApplicantId: Number(applicationRow.JobApplicantID)
-            })
-        ]);
+        await deleteNotificationByType({
+            notificationType: 'application_submitted',
+            jobApplicantId: Number(applicationRow.JobApplicantID)
+        });
+
+        await deleteNotificationByType({
+            notificationType: 'application_status_updated',
+            jobApplicantId: Number(applicationRow.JobApplicantID)
+        });
     }
 
     AppState.appliedJobs = AppState.appliedJobs.filter(
         item => Number(item.PostID) !== numericPostId
     );
-    AppState.appliedJobsMap.delete(numericPostId);
 
     await loadNotifications();
 
@@ -1756,12 +1692,10 @@ async function getApplicationCountsMap(postIds = []) {
         return countsMap;
     }
 
-    const uniquePostIds = [...new Set(postIds.map(Number).filter(Boolean))];
-
     const { data, error } = await supabase
         .from('ApplicationTbl')
         .select('PostID')
-        .in('PostID', uniquePostIds);
+        .in('PostID', postIds);
 
     if (error) {
         console.error('Failed to load application counts:', error);
@@ -1942,33 +1876,29 @@ async function loadApplicantsForSelectedPost() {
         return [];
     }
 
-    const [postResult, applicationResult] = await Promise.all([
-        supabase
-            .from('JobPostTbl')
-            .select('PostID, TargetScore')
-            .eq('PostID', postId)
-            .single(),
-        supabase
-            .from('ApplicationTbl')
-            .select(`
-                JobApplicantID,
-                PostID,
-                ApplicantID,
-                TotalScore,
-                ApplicationStatus,
-                DateApplied
-            `)
-            .eq('PostID', postId)
-    ]);
-
-    const { data: postRow, error: postError } = postResult;
-    const { data: applicationRows, error: applicationError } = applicationResult;
+    const { data: postRow, error: postError } = await supabase
+        .from('JobPostTbl')
+        .select('PostID, TargetScore')
+        .eq('PostID', postId)
+        .single();
 
     if (postError) {
         console.error('Failed to load selected post target score:', postError);
         ComponentData.applicants = [];
         return [];
     }
+
+    const { data: applicationRows, error: applicationError } = await supabase
+        .from('ApplicationTbl')
+        .select(`
+            JobApplicantID,
+            PostID,
+            ApplicantID,
+            TotalScore,
+            ApplicationStatus,
+            DateApplied
+        `)
+        .eq('PostID', postId);
 
     if (applicationError) {
         console.error('Failed to load applications:', applicationError);
@@ -2103,7 +2033,6 @@ async function renderViewApplicantsPage() {
 async function updateApplicationStatus(jobApplicantIds = [], newStatus = 'Pending') {
     const supabase = window.supabaseClient;
     const normalizedIds = jobApplicantIds.map(Number).filter(Boolean);
-    const normalizedIdSet = new Set(normalizedIds);
 
     if (!supabase || normalizedIds.length === 0) return false;
 
@@ -2119,7 +2048,7 @@ async function updateApplicationStatus(jobApplicantIds = [], newStatus = 'Pendin
     }
 
     ComponentData.applicants = ComponentData.applicants.map(applicant => {
-        if (normalizedIdSet.has(Number(applicant.jobApplicantId))) {
+        if (normalizedIds.includes(Number(applicant.jobApplicantId))) {
             return {
                 ...applicant,
                 applicationStatus: newStatus
@@ -2128,11 +2057,9 @@ async function updateApplicationStatus(jobApplicantIds = [], newStatus = 'Pendin
         return applicant;
     });
 
-    await Promise.all(
-        normalizedIds.map(jobApplicantId =>
-            syncApplicationStatusNotification(jobApplicantId, newStatus)
-        )
-    );
+    for (const jobApplicantId of normalizedIds) {
+        await syncApplicationStatusNotification(jobApplicantId, newStatus);
+    }
 
     await loadNotifications();
     return true;
@@ -2235,10 +2162,8 @@ async function getSavedPostsMap() {
 async function renderSavedJobsPage() {
     await loadUserJobRelations();
 
-    const [jobs, savedMap] = await Promise.all([
-        loadAllJobs(),
-        getSavedPostsMap()
-    ]);
+    const jobs = await loadAllJobs();
+    const savedMap = await getSavedPostsMap();
 
     let savedJobs = jobs
         .filter(job => isJobSavedByCurrentUser(job.id))
