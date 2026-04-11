@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeRegisterFlow();
     initializeBackButtons();
     initializeProfileUpload();
+    initializeTermsAndConditions();
     updateFinalPreview();
 });
 
@@ -371,7 +372,7 @@ function initializeRegisterFlow() {
         finalForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const terms = document.querySelector('input[name="terms"]')?.checked;
+            const terms = document.getElementById('termsCheckbox')?.checked;
 
             if (!terms) {
                 alert('Please agree to the Terms and Conditions');
@@ -480,6 +481,75 @@ function initializeProfileUpload() {
         } catch (err) {
             console.error('Image conversion failed:', err);
             alert('Failed to load selected image.');
+        }
+    });
+}
+
+function initializeTermsAndConditions() {
+    const termsCheckbox = document.getElementById('termsCheckbox');
+    const createAccountBtn = document.getElementById('createAccountBtn');
+    const openTermsBtn = document.getElementById('openTermsBtn');
+    const termsModal = document.getElementById('termsModal');
+    const closeTermsBtn = document.getElementById('closeTermsBtn');
+    const closeTermsFooterBtn = document.getElementById('closeTermsFooterBtn');
+    const agreeTermsBtn = document.getElementById('agreeTermsBtn');
+
+    if (!termsCheckbox || !createAccountBtn) return;
+
+    function syncCreateAccountButton() {
+        createAccountBtn.disabled = !termsCheckbox.checked;
+    }
+
+    function openTermsModal() {
+        if (!termsModal) return;
+        termsModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTermsModal() {
+        if (!termsModal) return;
+        termsModal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    syncCreateAccountButton();
+
+    termsCheckbox.addEventListener('change', syncCreateAccountButton);
+
+    if (openTermsBtn) {
+        openTermsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openTermsModal();
+        });
+    }
+
+    if (closeTermsBtn) {
+        closeTermsBtn.addEventListener('click', closeTermsModal);
+    }
+
+    if (closeTermsFooterBtn) {
+        closeTermsFooterBtn.addEventListener('click', closeTermsModal);
+    }
+
+    if (agreeTermsBtn) {
+        agreeTermsBtn.addEventListener('click', function() {
+            termsCheckbox.checked = true;
+            syncCreateAccountButton();
+            closeTermsModal();
+        });
+    }
+
+    if (termsModal) {
+        termsModal.addEventListener('click', function(e) {
+            if (e.target === termsModal) {
+                closeTermsModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && termsModal?.classList.contains('active')) {
+            closeTermsModal();
         }
     });
 }

@@ -336,10 +336,13 @@
                     <textarea id="description" name="description" rows="4" placeholder="Tell us about yourself..."></textarea>
                 </div>
                 
-                <div class="formOptions">
-                    <label class="formCheckBox">
-                        <input type="checkbox" name="terms" required>
-                        <span>By signing up I agree with the <a href="#" class="formFooterLink">Terms and Conditions</a></span>
+                <div class="formOptions termsRow">
+                    <label class="formCheckBox termsCheckWrap">
+                        <input type="checkbox" id="termsCheckbox" name="terms" required>
+                        <span>
+                            By signing up I agree with the
+                            <button type="button" id="openTermsBtn" class="termsLinkBtn">Terms and Conditions</button>
+                        </span>
                     </label>
                 </div>
                 
@@ -351,9 +354,59 @@
                         </svg>
                         Previous
                     </button>
-                    <button type="submit" class="formBtn formCreateAccountBtn">Create Account</button>
+                    <button type="submit" class="formBtn formCreateAccountBtn" id="createAccountBtn" disabled>Create Account</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <div id="termsModal" class="termsModal">
+        <div class="termsModalContent">
+            <div class="termsModalHeader">
+                <h2>Terms and Conditions</h2>
+                <button type="button" id="closeTermsBtn" class="termsModalClose" aria-label="Close Terms and Conditions">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                </button>
+            </div>
+
+            <div class="termsModalBody">
+                <p>Welcome to APPL-AI. By creating an account, you agree to use the platform honestly, respectfully, and in accordance with these terms.</p>
+
+                <h3>1. Account Responsibility</h3>
+                <p>You are responsible for the accuracy of the information you provide during registration. You must keep your login credentials secure and must not impersonate another person or organization.</p>
+
+                <h3>2. Acceptable Use</h3>
+                <p>You agree not to post false, misleading, harmful, offensive, or unlawful content. Employers must provide legitimate job information, and applicants must submit truthful profile and application details.</p>
+
+                <h3>3. Profile and Application Data</h3>
+                <p>By using APPL-AI, you allow the platform to store and process the information you submit, including profile details, uploaded images, descriptions, and job application data, for system functionality and matching purposes.</p>
+
+                <h3>4. Privacy</h3>
+                <p>APPL-AI will handle your information only for platform-related purposes. While reasonable effort is made to protect user data, users are also responsible for the information they choose to share.</p>
+
+                <h3>5. Employer and Applicant Conduct</h3>
+                <p>Employers must use applicant data fairly and only for recruitment-related purposes. Applicants must avoid spam applications, fraudulent claims, or misuse of employer information.</p>
+
+                <h3>6. System Availability</h3>
+                <p>APPL-AI may be updated, improved, or temporarily unavailable during maintenance, bug fixes, or system changes. We do not guarantee uninterrupted access at all times.</p>
+
+                <h3>7. Limitation of Liability</h3>
+                <p>APPL-AI serves as a platform for connecting applicants and employers. We are not responsible for hiring decisions, employer conduct, applicant conduct, or damages resulting from misuse of the platform.</p>
+
+                <h3>8. Changes to Terms</h3>
+                <p>These Terms and Conditions may be updated from time to time. Continued use of the platform after changes means you accept the updated terms.</p>
+
+                <h3>9. Agreement</h3>
+                <p>By clicking Agree, you confirm that you have read, understood, and accepted these Terms and Conditions.</p>
+            </div>
+
+            <div class="termsModalActions">
+                <button type="button" id="agreeTermsBtn" class="formBtn termsAgreeBtn">Agree</button>
+                <button type="button" id="closeTermsFooterBtn" class="backBtn termsCloseFooterBtn">Close</button>
+            </div>
         </div>
     </div>
     
