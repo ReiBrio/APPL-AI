@@ -4053,7 +4053,11 @@ async function populateEditProfileForm() {
         setInputByLabel(allInputs, 'Sex', (applicantRow.Gender || '').toLowerCase());
         setInputByLabel(allInputs, 'Birth Date', applicantRow.BirthDate || '');
         setInputByLabel(allInputs, 'Contact Number', applicantRow.ContactNumber || '');
-        setInputByLabel(allInputs, 'Education Attained', applicantRow.EducationAttained || '');
+
+        const educationField = document.getElementById('educationAttained');
+        if (educationField) {
+            educationField.value = applicantRow.EducationAttained || '';
+        }
     }
 
     if (isEmployer()) {
@@ -4125,6 +4129,8 @@ async function saveEditProfileForm(form) {
         }
 
         if (isApplicant()) {
+            const educationField = document.getElementById('educationAttained');
+
             const applicantPayload = {
                 LastName: getInputByLabel(allInputs, 'Surname'),
                 FirstName: getInputByLabel(allInputs, 'First Name'),
@@ -4133,7 +4139,7 @@ async function saveEditProfileForm(form) {
                 Gender: getInputByLabel(allInputs, 'Sex'),
                 BirthDate: getInputByLabel(allInputs, 'Birth Date'),
                 ContactNumber: getInputByLabel(allInputs, 'Contact Number'),
-                EducationAttained: getInputByLabel(allInputs, 'Education Attained')
+                EducationAttained: educationField ? educationField.value : ''
             };
 
             const { error: applicantError } = await supabase
