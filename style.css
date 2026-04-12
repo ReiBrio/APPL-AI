@@ -1922,8 +1922,8 @@ body {
     overflow: hidden;
 }
 .profileAvatar img {
-    width: 80%;
-    height: 80%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 .profileAvatar svg {
@@ -2481,8 +2481,8 @@ body {
     cursor: pointer;
 }
 .applicantAvatar img {
-    width: 80%;
-    height: 80%;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
 }
 .applicantAvatar svg {
