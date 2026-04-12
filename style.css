@@ -1330,8 +1330,8 @@ body {
     flex-shrink: 0;
 }
 .featuredCompanyImage img {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: cover; 
     display: block;
 }
@@ -1432,8 +1432,8 @@ body {
     cursor: pointer;
 }
 .companyLogo img {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: cover; 
     display: block;
 }
@@ -1764,8 +1764,8 @@ body {
     cursor: pointer;
 }
 .notificationCompanyImage img {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: cover;
     display: block;
 }
@@ -1922,8 +1922,8 @@ body {
     overflow: hidden;
 }
 .profileAvatar img {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: cover;
 }
 .profileAvatar svg {
@@ -2481,8 +2481,8 @@ body {
     cursor: pointer;
 }
 .applicantAvatar img {
-    width: 100%;
-    height: 100%;
+    width: 80%;
+    height: 80%;
     object-fit: cover;
 }
 .applicantAvatar svg {
